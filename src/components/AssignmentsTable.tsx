@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge, Group, Table } from "@mantine/core";
-import { getAchievedRank } from "@/lib/algorithm";
+import { getAchievedRank, getGroupAchievedRank } from "@/lib/algorithm";
 import type { Assignment, Group as GroupEntity, Person } from "@/lib/types";
 
 interface AssignmentsTableProps {
@@ -20,6 +20,7 @@ export function AssignmentsTable({
   backfilledPersonIds = [],
 }: AssignmentsTableProps) {
   const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
+  const groupById = new Map(groups.map((g) => [g.id, g]));
   const assignmentByPerson = new Map(assignments.map((a) => [a.personId, a]));
   const bumpedSet = new Set(bumpedPersonIds);
   const backfilledSet = new Set(backfilledPersonIds);
@@ -33,7 +34,8 @@ export function AssignmentsTable({
           <Table.Tr>
             <Table.Th>Person</Table.Th>
             <Table.Th>Assigned group</Table.Th>
-            <Table.Th>Rank achieved</Table.Th>
+            <Table.Th>Person&apos;s pick</Table.Th>
+            <Table.Th>Group&apos;s pick</Table.Th>
             <Table.Th>Notes</Table.Th>
           </Table.Tr>
         </Table.Thead>
@@ -42,6 +44,7 @@ export function AssignmentsTable({
             const assignment = assignmentByPerson.get(person.id);
             const groupId = assignment?.groupId ?? null;
             const rank = getAchievedRank(person, groupId);
+            const groupRank = groupId ? getGroupAchievedRank(groupById.get(groupId), person.id) : null;
             return (
               <Table.Tr key={person.id}>
                 <Table.Td>{person.name}</Table.Td>
@@ -55,6 +58,7 @@ export function AssignmentsTable({
                   )}
                 </Table.Td>
                 <Table.Td>{rank ?? "—"}</Table.Td>
+                <Table.Td>{groupRank ?? "—"}</Table.Td>
                 <Table.Td>
                   <Group gap={4}>
                     {bumpedSet.has(person.id) && (

@@ -253,14 +253,36 @@ describe("runOptimalAssignment", () => {
     expect(result.assignments).toEqual([{ personId: "alice", groupId: "design" }]);
   });
 
-  it("ignores group-side preferences (may not be a stable matching)", () => {
-    // eng prefers alice, but the optimal solve doesn't consult group preference at all.
+  it("ignores group-side preferences by default (may not be a stable matching)", () => {
+    // eng prefers alice, but the default "people" priority doesn't consult group preference at all.
     const people = [person("alice", ["design", "eng"]), person("bob", ["eng"])];
     const groups = [group("eng", 1, ["alice"]), group("design", 1)];
     const result = runOptimalAssignment(people, groups);
     const byId = new Map(result.assignments.map((a) => [a.personId, a.groupId]));
     expect(byId.get("alice")).toBe("design");
     expect(byId.get("bob")).toBe("eng");
+  });
+
+  it("with priority: groups, defers to which candidate each group prefers over the people's own rank order", () => {
+    // alice ranks eng first, bob ranks design first — but eng only wants bob and design
+    // only wants alice. Both arrangements match everyone, so priority decides the winner.
+    const people = [person("alice", ["eng", "design"]), person("bob", ["design", "eng"])];
+    const groups = [group("eng", 1, ["bob"]), group("design", 1, ["alice"])];
+    const result = runOptimalAssignment(people, groups, { priority: "groups" });
+    const byId = new Map(result.assignments.map((a) => [a.personId, a.groupId]));
+    expect(byId.get("alice")).toBe("design");
+    expect(byId.get("bob")).toBe("eng");
+  });
+
+  it("with priority: balanced, still never assigns anyone outside their own rankings", () => {
+    const people = [person("alice", ["eng", "design"]), person("bob", ["design", "eng"])];
+    const groups = [group("eng", 1, ["bob"]), group("design", 1, ["alice"])];
+    const result = runOptimalAssignment(people, groups, { priority: "balanced" });
+    for (const a of result.assignments) {
+      const p = people.find((person) => person.id === a.personId)!;
+      expect(a.groupId === null || p.rankings.includes(a.groupId)).toBe(true);
+    }
+    expect(result.assignments.filter((a) => a.groupId !== null)).toHaveLength(2);
   });
 });
 

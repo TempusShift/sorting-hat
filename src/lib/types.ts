@@ -8,8 +8,10 @@ export interface Session {
   result: MatchResult | null;
   /** When true, stable matching tries to seat unmatched people by shifting others between their own ranked groups. Absent on older sessions. */
   fillUnmatched?: boolean;
-  /** Which algorithm to run. "stable" (default) is person-proposing Gale-Shapley; "optimal" minimizes mean rank achieved. Absent on older sessions. */
+  /** Which algorithm to run. "stable" (default) is person-proposing Gale-Shapley; "optimal" minimizes weighted cost. Absent on older sessions. */
   matchingMethod?: "stable" | "optimal";
+  /** For matchingMethod "optimal": which side's preferences to weight more heavily. Defaults to "people". Absent on older sessions. */
+  optimalPriority?: "people" | "balanced" | "groups";
 }
 
 export interface Person {

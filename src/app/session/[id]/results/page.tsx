@@ -18,6 +18,7 @@ import {
   Title,
 } from "@mantine/core";
 import {
+  IconArrowsDiff,
   IconArrowsShuffle,
   IconDownload,
   IconEdit,
@@ -28,6 +29,7 @@ import {
 } from "@tabler/icons-react";
 import { AlternativesPanel } from "@/components/AlternativesPanel";
 import { AssignmentsTable } from "@/components/AssignmentsTable";
+import { CompareMethodsPanel } from "@/components/CompareMethodsPanel";
 import { NewSessionButton } from "@/components/NewSessionButton";
 import { StabilityPanel } from "@/components/StabilityPanel";
 import { StatsPanel } from "@/components/StatsPanel";
@@ -44,6 +46,7 @@ export default function ResultsPage() {
   const runMatching = useSessionStore((s) => s.runMatching);
   const setFillUnmatched = useSessionStore((s) => s.setFillUnmatched);
   const setMatchingMethod = useSessionStore((s) => s.setMatchingMethod);
+  const setOptimalPriority = useSessionStore((s) => s.setOptimalPriority);
 
   useEffect(() => {
     hydrate();
@@ -146,6 +149,25 @@ export default function ResultsPage() {
             }}
           />
         )}
+        {(session.matchingMethod ?? "stable") === "optimal" && (
+          <Box mt="sm">
+            <Text size="sm" fw={500} mb={4}>
+              Priority
+            </Text>
+            <SegmentedControl
+              value={session.optimalPriority ?? "people"}
+              onChange={(v) => {
+                setOptimalPriority(sessionId, v as "people" | "balanced" | "groups");
+                runMatching(sessionId);
+              }}
+              data={[
+                { label: "People", value: "people" },
+                { label: "Balanced", value: "balanced" },
+                { label: "Groups", value: "groups" },
+              ]}
+            />
+          </Box>
+        )}
       </Box>
 
       <Tabs defaultValue="assignments">
@@ -161,6 +183,9 @@ export default function ResultsPage() {
           </Tabs.Tab>
           <Tabs.Tab value="alternatives" leftSection={<IconGitCompare size={16} />}>
             Alternatives
+          </Tabs.Tab>
+          <Tabs.Tab value="compare" leftSection={<IconArrowsDiff size={16} />}>
+            Compare methods
           </Tabs.Tab>
           <Tabs.Tab value="export" leftSection={<IconDownload size={16} />}>
             Export
@@ -198,6 +223,16 @@ export default function ResultsPage() {
             assignments={result.assignments}
             fillUnmatched={session.fillUnmatched}
             matchingMethod={session.matchingMethod}
+            optimalPriority={session.optimalPriority}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="compare">
+          <CompareMethodsPanel
+            people={people}
+            groups={groups}
+            fillUnmatched={session.fillUnmatched}
+            optimalPriority={session.optimalPriority}
           />
         </Tabs.Panel>
 

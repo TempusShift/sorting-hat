@@ -54,6 +54,7 @@ export default function SetupPage() {
   const setPeopleAndGroups = useSessionStore((s) => s.setPeopleAndGroups);
   const setFillUnmatched = useSessionStore((s) => s.setFillUnmatched);
   const setMatchingMethod = useSessionStore((s) => s.setMatchingMethod);
+  const setOptimalPriority = useSessionStore((s) => s.setOptimalPriority);
   const runMatching = useSessionStore((s) => s.runMatching);
 
   useEffect(() => {
@@ -263,6 +264,26 @@ export default function SetupPage() {
                   : "Ignores group preferences entirely and finds the assignment with the lowest possible average rank achieved, matching as many people as possible first."}
               </Text>
             </Box>
+            {(session.matchingMethod ?? "stable") === "optimal" && (
+              <Box>
+                <Text size="sm" fw={500} mb={4}>
+                  Priority
+                </Text>
+                <SegmentedControl
+                  value={session.optimalPriority ?? "people"}
+                  onChange={(v) => setOptimalPriority(sessionId, v as "people" | "balanced" | "groups")}
+                  data={[
+                    { label: "People", value: "people" },
+                    { label: "Balanced", value: "balanced" },
+                    { label: "Groups", value: "groups" },
+                  ]}
+                />
+                <Text size="xs" c="dimmed" mt={4}>
+                  Which side&apos;s stated preferences count more when picking among assignments that match the
+                  same number of people.
+                </Text>
+              </Box>
+            )}
             {(session.matchingMethod ?? "stable") === "stable" && (
               <Switch
                 label="Avoid leaving anyone unmatched when capacity allows"

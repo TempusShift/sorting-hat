@@ -2,6 +2,19 @@ import type { Assignment, Group, MatchResult, Person } from "./types";
 
 export type MatchingMethod = "stable" | "optimal";
 
+/**
+ * Which side's preferences the optimal solve weights more heavily.
+ * "people" (default) reproduces the original person-only behavior; "groups" mirrors
+ * that but from the group side; "balanced" weights both equally.
+ */
+export type OptimalPriority = "people" | "balanced" | "groups";
+
+const PRIORITY_WEIGHTS: Record<OptimalPriority, { person: number; group: number }> = {
+  people: { person: 1, group: 0 },
+  balanced: { person: 1, group: 1 },
+  groups: { person: 0, group: 1 },
+};
+
 interface GaleShapleyOptions {
   /** Group ids to exclude from the run entirely (used for alternatives analysis). */
   excludeGroupIds?: string[];
@@ -21,6 +34,17 @@ interface GaleShapleyOptions {
 function groupPreferenceRank(group: Group, personId: string): number {
   const idx = group.rankings.indexOf(personId);
   return idx === -1 ? Number.POSITIVE_INFINITY : idx;
+}
+
+/**
+ * Group's preference cost for a person, bounded (unlike groupPreferenceRank) so it can
+ * be summed in the optimal solve: indifferent groups cost nothing, and someone the
+ * group didn't list costs as much as its least-preferred listed member.
+ */
+function groupPreferenceCost(group: Group, personId: string): number {
+  if (group.rankings.length === 0) return 0;
+  const idx = group.rankings.indexOf(personId);
+  return idx === -1 ? group.rankings.length : idx;
 }
 
 /**
@@ -219,18 +243,22 @@ class MinCostFlow {
 interface OptimalAssignmentOptions {
   /** Group ids to exclude from consideration entirely (used for alternatives analysis). */
   excludeGroupIds?: string[];
+  /** Which side's preferences to weight more heavily. Defaults to "people". */
+  priority?: OptimalPriority;
 }
 
 /**
  * Finds the assignment that seats the maximum possible number of people into a group
  * they themselves ranked and, among all assignments achieving that maximum, minimizes
- * the total (equivalently mean) rank achieved. Solved as min-cost max-flow rather than
- * brute-force permutations, which are infeasible past a handful of people.
+ * total weighted cost. Solved as min-cost max-flow rather than brute-force permutations,
+ * which are infeasible past a handful of people.
  *
- * Unlike runGaleShapley, this ignores group-side preferences entirely — it purely
- * optimizes for people's stated happiness, so the result may not be a stable matching.
- * Never places anyone into a group they didn't rank (indifferent people, who ranked
- * nothing, are willing to go anywhere at no cost, same as elsewhere in this module).
+ * `priority` controls how much group-side preference counts alongside person-side
+ * preference (see PRIORITY_WEIGHTS); at the default "people" weighting this reduces to
+ * purely optimizing people's stated happiness, so the result may not be a stable
+ * matching. Never places anyone into a group they didn't rank (indifferent people, who
+ * ranked nothing, are willing to go anywhere at no person-side cost, same as elsewhere
+ * in this module).
  */
 export function runOptimalAssignment(
   people: Person[],
@@ -238,8 +266,10 @@ export function runOptimalAssignment(
   options: OptimalAssignmentOptions = {},
 ): MatchResult {
   const exclude = new Set(options.excludeGroupIds ?? []);
+  const weights = PRIORITY_WEIGHTS[options.priority ?? "people"];
   const activeGroups = groups.filter((g) => !exclude.has(g.id));
   const groupIndexById = new Map(activeGroups.map((g, i) => [g.id, i]));
+  const groupById = new Map(activeGroups.map((g) => [g.id, g]));
   const allGroupIds = activeGroups.map((g) => g.id);
 
   const source = 0;
@@ -260,7 +290,9 @@ export function runOptimalAssignment(
       const gi = groupIndexById.get(groupId);
       if (gi === undefined) return;
       seen.add(groupId);
-      const cost = p.rankings.length > 0 ? rankIdx : 0;
+      const personCost = p.rankings.length > 0 ? rankIdx : 0;
+      const groupCost = groupPreferenceCost(groupById.get(groupId)!, p.id);
+      const cost = weights.person * personCost + weights.group * groupCost;
       const edgeIdx = flow.addEdge(personNode(i), groupNode(gi), 1, cost);
       edges.push({ node: personNode(i), edgeIdx, groupId });
     });
@@ -292,6 +324,13 @@ export function runOptimalAssignment(
 export function getAchievedRank(person: Person, groupId: string | null): number | null {
   if (!groupId) return null;
   const idx = person.rankings.indexOf(groupId);
+  return idx === -1 ? null : idx + 1;
+}
+
+/** 1-indexed rank of the person within the group's preference list, or null if unranked/unmatched. */
+export function getGroupAchievedRank(group: Group | undefined, personId: string): number | null {
+  if (!group) return null;
+  const idx = group.rankings.indexOf(personId);
   return idx === -1 ? null : idx + 1;
 }
 
@@ -374,7 +413,7 @@ export function computeAlternatives(
   people: Person[],
   groups: Group[],
   assignments: Assignment[],
-  options: { fillUnmatched?: boolean; method?: MatchingMethod } = {},
+  options: { fillUnmatched?: boolean; method?: MatchingMethod; priority?: OptimalPriority } = {},
 ): Map<string, string | null> {
   const alternatives = new Map<string, string | null>();
   const assignedGroup = new Map(assignments.map((a) => [a.personId, a.groupId]));
@@ -384,7 +423,7 @@ export function computeAlternatives(
     byExcludedGroup.set(
       groupId,
       options.method === "optimal"
-        ? runOptimalAssignment(people, groups, { excludeGroupIds: [groupId] })
+        ? runOptimalAssignment(people, groups, { excludeGroupIds: [groupId], priority: options.priority })
         : runGaleShapley(people, groups, { excludeGroupIds: [groupId], fillUnmatched: options.fillUnmatched }),
     );
   }

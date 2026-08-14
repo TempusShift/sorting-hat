@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import { runGaleShapley, runOptimalAssignment, type MatchingMethod } from "@/lib/algorithm";
+import { runGaleShapley, runOptimalAssignment, type MatchingMethod, type OptimalPriority } from "@/lib/algorithm";
 import * as storage from "@/lib/storage";
 import type { Group, Person, Session } from "@/lib/types";
 
@@ -14,6 +14,7 @@ interface SessionStore {
   setPeopleAndGroups: (id: string, people: Person[], groups: Group[]) => void;
   setFillUnmatched: (id: string, fillUnmatched: boolean) => void;
   setMatchingMethod: (id: string, matchingMethod: MatchingMethod) => void;
+  setOptimalPriority: (id: string, optimalPriority: OptimalPriority) => void;
   runMatching: (id: string) => void;
   deleteSession: (id: string) => void;
 }
@@ -43,6 +44,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       result: null,
       fillUnmatched: false,
       matchingMethod: "stable",
+      optimalPriority: "people",
     };
     storage.saveSession(session);
     set({ sessions: [session, ...get().sessions] });
@@ -83,12 +85,20 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
   },
 
+  setOptimalPriority: (id, optimalPriority) => {
+    const session = get().getSession(id);
+    if (!session) return;
+    const updated = touch({ ...session, optimalPriority });
+    storage.saveSession(updated);
+    set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
+  },
+
   runMatching: (id) => {
     const session = get().getSession(id);
     if (!session) return;
     const result =
       session.matchingMethod === "optimal"
-        ? runOptimalAssignment(session.people, session.groups)
+        ? runOptimalAssignment(session.people, session.groups, { priority: session.optimalPriority ?? "people" })
         : runGaleShapley(session.people, session.groups, { fillUnmatched: session.fillUnmatched ?? false });
     const updated = touch({ ...session, result });
     storage.saveSession(updated);
