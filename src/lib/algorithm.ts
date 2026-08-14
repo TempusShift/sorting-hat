@@ -1,5 +1,7 @@
 import type { Assignment, Group, MatchResult, Person } from "./types";
 
+export type MatchingMethod = "stable" | "optimal";
+
 interface GaleShapleyOptions {
   /** Group ids to exclude from the run entirely (used for alternatives analysis). */
   excludeGroupIds?: string[];
@@ -144,6 +146,148 @@ export function runGaleShapley(
   };
 }
 
+interface FlowEdge {
+  to: number;
+  cap: number;
+  cost: number;
+  rev: number;
+}
+
+/**
+ * Minimal min-cost max-flow (successive shortest augmenting paths via SPFA).
+ * Running to completion yields the minimum-cost solution among all maximum-flow
+ * solutions — exactly "match as many as possible, then minimize total cost."
+ */
+class MinCostFlow {
+  private graph: FlowEdge[][];
+
+  constructor(nodeCount: number) {
+    this.graph = Array.from({ length: nodeCount }, () => []);
+  }
+
+  addEdge(from: number, to: number, cap: number, cost: number): number {
+    const idx = this.graph[from].length;
+    this.graph[from].push({ to, cap, cost, rev: this.graph[to].length });
+    this.graph[to].push({ to: from, cap: 0, cost: -cost, rev: idx });
+    return idx;
+  }
+
+  remainingCap(node: number, edgeIdx: number): number {
+    return this.graph[node][edgeIdx].cap;
+  }
+
+  run(source: number, sink: number): void {
+    const n = this.graph.length;
+    for (;;) {
+      const dist = new Array<number>(n).fill(Number.POSITIVE_INFINITY);
+      const inQueue = new Array<boolean>(n).fill(false);
+      const prevNode = new Array<number>(n).fill(-1);
+      const prevEdge = new Array<number>(n).fill(-1);
+      dist[source] = 0;
+      const queue = [source];
+      inQueue[source] = true;
+      while (queue.length > 0) {
+        const u = queue.shift()!;
+        inQueue[u] = false;
+        this.graph[u].forEach((e, i) => {
+          if (e.cap > 0 && dist[u] + e.cost < dist[e.to]) {
+            dist[e.to] = dist[u] + e.cost;
+            prevNode[e.to] = u;
+            prevEdge[e.to] = i;
+            if (!inQueue[e.to]) {
+              queue.push(e.to);
+              inQueue[e.to] = true;
+            }
+          }
+        });
+      }
+      if (dist[sink] === Number.POSITIVE_INFINITY) break;
+
+      let bottleneck = Number.POSITIVE_INFINITY;
+      for (let v = sink; v !== source; v = prevNode[v]) {
+        bottleneck = Math.min(bottleneck, this.graph[prevNode[v]][prevEdge[v]].cap);
+      }
+      for (let v = sink; v !== source; v = prevNode[v]) {
+        const e = this.graph[prevNode[v]][prevEdge[v]];
+        e.cap -= bottleneck;
+        this.graph[v][e.rev].cap += bottleneck;
+      }
+    }
+  }
+}
+
+interface OptimalAssignmentOptions {
+  /** Group ids to exclude from consideration entirely (used for alternatives analysis). */
+  excludeGroupIds?: string[];
+}
+
+/**
+ * Finds the assignment that seats the maximum possible number of people into a group
+ * they themselves ranked and, among all assignments achieving that maximum, minimizes
+ * the total (equivalently mean) rank achieved. Solved as min-cost max-flow rather than
+ * brute-force permutations, which are infeasible past a handful of people.
+ *
+ * Unlike runGaleShapley, this ignores group-side preferences entirely — it purely
+ * optimizes for people's stated happiness, so the result may not be a stable matching.
+ * Never places anyone into a group they didn't rank (indifferent people, who ranked
+ * nothing, are willing to go anywhere at no cost, same as elsewhere in this module).
+ */
+export function runOptimalAssignment(
+  people: Person[],
+  groups: Group[],
+  options: OptimalAssignmentOptions = {},
+): MatchResult {
+  const exclude = new Set(options.excludeGroupIds ?? []);
+  const activeGroups = groups.filter((g) => !exclude.has(g.id));
+  const groupIndexById = new Map(activeGroups.map((g, i) => [g.id, i]));
+  const allGroupIds = activeGroups.map((g) => g.id);
+
+  const source = 0;
+  const personNode = (i: number) => 1 + i;
+  const groupNode = (i: number) => 1 + people.length + i;
+  const sink = 1 + people.length + activeGroups.length;
+
+  const flow = new MinCostFlow(sink + 1);
+  const personEdges = new Map<string, { node: number; edgeIdx: number; groupId: string }[]>();
+
+  people.forEach((p, i) => {
+    flow.addEdge(source, personNode(i), 1, 0);
+    const rankings = p.rankings.length > 0 ? p.rankings : allGroupIds;
+    const edges: { node: number; edgeIdx: number; groupId: string }[] = [];
+    const seen = new Set<string>();
+    rankings.forEach((groupId, rankIdx) => {
+      if (seen.has(groupId)) return;
+      const gi = groupIndexById.get(groupId);
+      if (gi === undefined) return;
+      seen.add(groupId);
+      const cost = p.rankings.length > 0 ? rankIdx : 0;
+      const edgeIdx = flow.addEdge(personNode(i), groupNode(gi), 1, cost);
+      edges.push({ node: personNode(i), edgeIdx, groupId });
+    });
+    personEdges.set(p.id, edges);
+  });
+
+  activeGroups.forEach((g, i) => {
+    flow.addEdge(groupNode(i), sink, g.capacity, 0);
+  });
+
+  flow.run(source, sink);
+
+  const assignments: Assignment[] = people.map((p) => {
+    const edges = personEdges.get(p.id)!;
+    const used = edges.find((e) => flow.remainingCap(e.node, e.edgeIdx) === 0);
+    return { personId: p.id, groupId: used?.groupId ?? null };
+  });
+
+  return {
+    assignments,
+    runAt: new Date().toISOString(),
+    bumpedPersonIds: [],
+    shiftedPersonIds: [],
+    backfilledPersonIds: [],
+  };
+}
+
 /** 1-indexed rank of the group within the person's preference list, or null if unranked/unmatched. */
 export function getAchievedRank(person: Person, groupId: string | null): number | null {
   if (!groupId) return null;
@@ -230,7 +374,7 @@ export function computeAlternatives(
   people: Person[],
   groups: Group[],
   assignments: Assignment[],
-  options: { fillUnmatched?: boolean } = {},
+  options: { fillUnmatched?: boolean; method?: MatchingMethod } = {},
 ): Map<string, string | null> {
   const alternatives = new Map<string, string | null>();
   const assignedGroup = new Map(assignments.map((a) => [a.personId, a.groupId]));
@@ -239,7 +383,9 @@ export function computeAlternatives(
   for (const groupId of new Set(assignments.map((a) => a.groupId).filter((g): g is string => g !== null))) {
     byExcludedGroup.set(
       groupId,
-      runGaleShapley(people, groups, { excludeGroupIds: [groupId], fillUnmatched: options.fillUnmatched }),
+      options.method === "optimal"
+        ? runOptimalAssignment(people, groups, { excludeGroupIds: [groupId] })
+        : runGaleShapley(people, groups, { excludeGroupIds: [groupId], fillUnmatched: options.fillUnmatched }),
     );
   }
 

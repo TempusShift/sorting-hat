@@ -5,6 +5,7 @@ import {
   findBlockingPairs,
   getAchievedRank,
   runGaleShapley,
+  runOptimalAssignment,
 } from "./algorithm";
 import type { Group, Person } from "./types";
 
@@ -192,6 +193,74 @@ describe("runGaleShapley", () => {
       expect(byId.get("alice")).toBe("marketing");
       expect(new Set(result.shiftedPersonIds)).toEqual(new Set(["bob", "alice"]));
     });
+  });
+});
+
+describe("runOptimalAssignment", () => {
+  it("achieves the best possible mean rank given capacity constraints", () => {
+    // Both alice and bob rank eng first, design second, but eng only has one seat, so
+    // one of them has to take their second choice — the best achievable mean is 1.5.
+    const people = [person("alice", ["eng", "design"]), person("bob", ["eng", "design"])];
+    const groups = [group("eng", 1), group("design", 1)];
+    const result = runOptimalAssignment(people, groups);
+    const byId = new Map(result.assignments.map((a) => [a.personId, a.groupId]));
+    const ranks = people.map((p) => getAchievedRank(p, byId.get(p.id) ?? null)!);
+    expect(ranks.filter((r) => r !== null)).toHaveLength(2);
+    expect((ranks[0] + ranks[1]) / 2).toBe(1.5);
+  });
+
+  it("maximizes matched count before minimizing rank", () => {
+    // carol only ranks eng; if bob greedily took eng for a rank-1, carol would be shut
+    // out entirely. Matching everyone (even at a worse mean) wins over a lower mean rank.
+    const people = [
+      person("bob", ["eng", "design"]),
+      person("alice", ["design", "marketing"]),
+      person("carol", ["eng"]),
+    ];
+    const groups = [group("eng", 1), group("design", 1), group("marketing", 1)];
+    const result = runOptimalAssignment(people, groups);
+    const unmatched = result.assignments.filter((a) => a.groupId === null);
+    expect(unmatched).toHaveLength(0);
+  });
+
+  it("never assigns anyone to a group they did not rank", () => {
+    const people = [person("alice", ["eng"]), person("bob", ["eng"])];
+    const groups = [group("eng", 1), group("design", 1)];
+    const result = runOptimalAssignment(people, groups);
+    const bobAssignment = result.assignments.find((a) => a.personId === "bob");
+    expect(bobAssignment?.groupId).toBeNull();
+  });
+
+  it("lets an indifferent person (no rankings) fill any remaining group", () => {
+    const people = [person("alice", [])];
+    const groups = [group("eng", 1)];
+    const result = runOptimalAssignment(people, groups);
+    expect(result.assignments).toEqual([{ personId: "alice", groupId: "eng" }]);
+  });
+
+  it("respects group capacity", () => {
+    const people = [person("alice", ["eng"]), person("bob", ["eng"]), person("carol", ["eng"])];
+    const groups = [group("eng", 2)];
+    const result = runOptimalAssignment(people, groups);
+    const matched = result.assignments.filter((a) => a.groupId === "eng");
+    expect(matched).toHaveLength(2);
+  });
+
+  it("excludes groups passed via excludeGroupIds", () => {
+    const people = [person("alice", ["eng", "design"])];
+    const groups = [group("eng", 1), group("design", 1)];
+    const result = runOptimalAssignment(people, groups, { excludeGroupIds: ["eng"] });
+    expect(result.assignments).toEqual([{ personId: "alice", groupId: "design" }]);
+  });
+
+  it("ignores group-side preferences (may not be a stable matching)", () => {
+    // eng prefers alice, but the optimal solve doesn't consult group preference at all.
+    const people = [person("alice", ["design", "eng"]), person("bob", ["eng"])];
+    const groups = [group("eng", 1, ["alice"]), group("design", 1)];
+    const result = runOptimalAssignment(people, groups);
+    const byId = new Map(result.assignments.map((a) => [a.personId, a.groupId]));
+    expect(byId.get("alice")).toBe("design");
+    expect(byId.get("bob")).toBe("eng");
   });
 });
 

@@ -3,7 +3,20 @@
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Alert, Button, Container, Group, Loader, Stack, Switch, Tabs, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  Box,
+  Button,
+  Container,
+  Group,
+  Loader,
+  SegmentedControl,
+  Stack,
+  Switch,
+  Tabs,
+  Text,
+  Title,
+} from "@mantine/core";
 import {
   IconArrowsShuffle,
   IconDownload,
@@ -30,6 +43,7 @@ export default function ResultsPage() {
   const session = useSessionStore((s) => s.sessions.find((sess) => sess.id === sessionId));
   const runMatching = useSessionStore((s) => s.runMatching);
   const setFillUnmatched = useSessionStore((s) => s.setFillUnmatched);
+  const setMatchingMethod = useSessionStore((s) => s.setMatchingMethod);
 
   useEffect(() => {
     hydrate();
@@ -105,15 +119,34 @@ export default function ResultsPage() {
         </Group>
       </Group>
 
-      <Switch
-        mb="xl"
-        label="Avoid leaving anyone unmatched when capacity allows"
-        checked={session.fillUnmatched ?? false}
-        onChange={(e) => {
-          setFillUnmatched(sessionId, e.currentTarget.checked);
-          runMatching(sessionId);
-        }}
-      />
+      <Box mb="xl">
+        <Text size="sm" fw={500} mb={4}>
+          Matching method
+        </Text>
+        <SegmentedControl
+          value={session.matchingMethod ?? "stable"}
+          onChange={(v) => {
+            setMatchingMethod(sessionId, v as "stable" | "optimal");
+            runMatching(sessionId);
+          }}
+          data={[
+            { label: "Stable (Gale-Shapley)", value: "stable" },
+            { label: "Optimal (lowest mean rank)", value: "optimal" },
+          ]}
+        />
+        {(session.matchingMethod ?? "stable") === "stable" && (
+          <Switch
+            mt="sm"
+            label="Avoid leaving anyone unmatched when capacity allows"
+            description="Shifts other people between groups they ranked to free up a seat — never into a group nobody ranked"
+            checked={session.fillUnmatched ?? false}
+            onChange={(e) => {
+              setFillUnmatched(sessionId, e.currentTarget.checked);
+              runMatching(sessionId);
+            }}
+          />
+        )}
+      </Box>
 
       <Tabs defaultValue="assignments">
         <Tabs.List mb="md">
@@ -164,6 +197,7 @@ export default function ResultsPage() {
             groups={groups}
             assignments={result.assignments}
             fillUnmatched={session.fillUnmatched}
+            matchingMethod={session.matchingMethod}
           />
         </Tabs.Panel>
 

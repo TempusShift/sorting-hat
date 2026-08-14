@@ -6,8 +6,10 @@ export interface Session {
   people: Person[];
   groups: Group[];
   result: MatchResult | null;
-  /** When true, unmatched people are backfilled into any group with open capacity. Absent on older sessions. */
+  /** When true, stable matching tries to seat unmatched people by shifting others between their own ranked groups. Absent on older sessions. */
   fillUnmatched?: boolean;
+  /** Which algorithm to run. "stable" (default) is person-proposing Gale-Shapley; "optimal" minimizes mean rank achieved. Absent on older sessions. */
+  matchingMethod?: "stable" | "optimal";
 }
 
 export interface Person {

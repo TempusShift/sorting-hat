@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import { runGaleShapley } from "@/lib/algorithm";
+import { runGaleShapley, runOptimalAssignment, type MatchingMethod } from "@/lib/algorithm";
 import * as storage from "@/lib/storage";
 import type { Group, Person, Session } from "@/lib/types";
 
@@ -13,6 +13,7 @@ interface SessionStore {
   renameSession: (id: string, name: string) => void;
   setPeopleAndGroups: (id: string, people: Person[], groups: Group[]) => void;
   setFillUnmatched: (id: string, fillUnmatched: boolean) => void;
+  setMatchingMethod: (id: string, matchingMethod: MatchingMethod) => void;
   runMatching: (id: string) => void;
   deleteSession: (id: string) => void;
 }
@@ -41,6 +42,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       groups: [],
       result: null,
       fillUnmatched: false,
+      matchingMethod: "stable",
     };
     storage.saveSession(session);
     set({ sessions: [session, ...get().sessions] });
@@ -73,12 +75,21 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
   },
 
+  setMatchingMethod: (id, matchingMethod) => {
+    const session = get().getSession(id);
+    if (!session) return;
+    const updated = touch({ ...session, matchingMethod });
+    storage.saveSession(updated);
+    set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
+  },
+
   runMatching: (id) => {
     const session = get().getSession(id);
     if (!session) return;
-    const result = runGaleShapley(session.people, session.groups, {
-      fillUnmatched: session.fillUnmatched ?? false,
-    });
+    const result =
+      session.matchingMethod === "optimal"
+        ? runOptimalAssignment(session.people, session.groups)
+        : runGaleShapley(session.people, session.groups, { fillUnmatched: session.fillUnmatched ?? false });
     const updated = touch({ ...session, result });
     storage.saveSession(updated);
     set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });

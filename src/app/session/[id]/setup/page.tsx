@@ -11,6 +11,7 @@ import {
   Group,
   List,
   Loader,
+  SegmentedControl,
   SimpleGrid,
   Stack,
   Stepper,
@@ -52,6 +53,7 @@ export default function SetupPage() {
   const renameSession = useSessionStore((s) => s.renameSession);
   const setPeopleAndGroups = useSessionStore((s) => s.setPeopleAndGroups);
   const setFillUnmatched = useSessionStore((s) => s.setFillUnmatched);
+  const setMatchingMethod = useSessionStore((s) => s.setMatchingMethod);
   const runMatching = useSessionStore((s) => s.runMatching);
 
   useEffect(() => {
@@ -243,12 +245,32 @@ export default function SetupPage() {
 
         <Stepper.Step label="Review" description="Confirm and run">
           <Stack mt="lg">
-            <Switch
-              label="Avoid leaving anyone unmatched when capacity allows"
-              description="If someone's ranked groups are full, place them into any group with an open slot, even one they didn't rank"
-              checked={session.fillUnmatched ?? false}
-              onChange={(e) => setFillUnmatched(sessionId, e.currentTarget.checked)}
-            />
+            <Box>
+              <Text size="sm" fw={500} mb={4}>
+                Matching method
+              </Text>
+              <SegmentedControl
+                value={session.matchingMethod ?? "stable"}
+                onChange={(v) => setMatchingMethod(sessionId, v as "stable" | "optimal")}
+                data={[
+                  { label: "Stable (Gale-Shapley)", value: "stable" },
+                  { label: "Optimal (lowest mean rank)", value: "optimal" },
+                ]}
+              />
+              <Text size="xs" c="dimmed" mt={4}>
+                {(session.matchingMethod ?? "stable") === "stable"
+                  ? "Balances both sides' preferences into a matching neither a person nor a group could improve on by defecting together."
+                  : "Ignores group preferences entirely and finds the assignment with the lowest possible average rank achieved, matching as many people as possible first."}
+              </Text>
+            </Box>
+            {(session.matchingMethod ?? "stable") === "stable" && (
+              <Switch
+                label="Avoid leaving anyone unmatched when capacity allows"
+                description="If someone's ranked groups are full, try shifting other people to a different group they also ranked to free up a seat — never into a group nobody ranked"
+                checked={session.fillUnmatched ?? false}
+                onChange={(e) => setFillUnmatched(sessionId, e.currentTarget.checked)}
+              />
+            )}
             <Box>
               <Text size="sm" fw={500} mb={4}>
                 People ({reviewPeople.length})

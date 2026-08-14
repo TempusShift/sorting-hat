@@ -1,7 +1,7 @@
 "use client";
 
 import { Table } from "@mantine/core";
-import { computeAlternatives } from "@/lib/algorithm";
+import { computeAlternatives, type MatchingMethod } from "@/lib/algorithm";
 import type { Assignment, Group, Person } from "@/lib/types";
 
 interface AlternativesPanelProps {
@@ -9,10 +9,17 @@ interface AlternativesPanelProps {
   groups: Group[];
   assignments: Assignment[];
   fillUnmatched?: boolean;
+  matchingMethod?: MatchingMethod;
 }
 
-export function AlternativesPanel({ people, groups, assignments, fillUnmatched }: AlternativesPanelProps) {
-  const alternatives = computeAlternatives(people, groups, assignments, { fillUnmatched });
+export function AlternativesPanel({
+  people,
+  groups,
+  assignments,
+  fillUnmatched,
+  matchingMethod,
+}: AlternativesPanelProps) {
+  const alternatives = computeAlternatives(people, groups, assignments, { fillUnmatched, method: matchingMethod });
   const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
   const assignmentByPerson = new Map(assignments.map((a) => [a.personId, a]));
 

@@ -64,7 +64,7 @@ export function AssignmentsTable({
                     )}
                     {backfilledSet.has(person.id) && (
                       <Badge variant="light" color="blue">
-                        Unranked group
+                        Backfilled
                       </Badge>
                     )}
                   </Group>

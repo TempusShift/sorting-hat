@@ -135,10 +135,11 @@ export function StatsPanel({
             {backfilledPersonIds.length > 0 && (
               <div>
                 <Text size="sm" fw={500}>
-                  Backfilled into an open slot ({backfilledPersonIds.length})
+                  Seated by shifting others ({backfilledPersonIds.length})
                 </Text>
                 <Text size="xs" c="dimmed" mb={4}>
-                  Left unmatched by stable matching, then seated into remaining capacity via fillUnmatched.
+                  Left unmatched by stable matching at first; shifting other people opened a seat in
+                  one of their own ranked groups.
                 </Text>
                 <List size="sm">
                   {backfilledPersonIds.map((id) => (
