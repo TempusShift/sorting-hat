@@ -19,18 +19,89 @@ export interface CsvParseResult<T> {
   errors: string[];
 }
 
-function parseRawRows(csvText: string): { rows: string[][]; errors: string[] } {
+/** Case/punctuation/whitespace-insensitive key so free-typed names (e.g. across two different form exports) still cross-reference — "PLA- Quickstart" and "PLA QuickStart" collapse to the same key. */
+function normalizeNameKey(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "");
+}
+
+function parseRawRows(csvText: string): { header: string[] | null; rows: string[][]; errors: string[] } {
   const parsed = Papa.parse<string[]>(csvText.trim(), { skipEmptyLines: true });
   const errors = parsed.errors.map((e) => `Row ${(e.row ?? 0) + 1}: ${e.message}`);
-  let rows = parsed.data;
-  if (rows.length > 0 && (rows[0][0] ?? "").trim().toLowerCase() === "name") {
-    rows = rows.slice(1);
-  }
-  return { rows, errors };
+  const rows = parsed.data;
+  const header = rows.length > 0 ? rows[0] : null;
+  return { header, rows, errors };
+}
+
+// Undocumented fallback support for Microsoft/Google Forms "preference survey" exports
+// (e.g. rolling-match style talent/team preference forms). Not part of the public CSV spec —
+// detected structurally so it keeps working across differently-worded survey questions.
+const FORM_EXPORT_PREFIX = ["id", "start time", "completion time", "email", "name"];
+
+function isFormsExportHeader(header: string[] | null): header is string[] {
+  if (!header) return false;
+  return FORM_EXPORT_PREFIX.every((expected, i) => (header[i] ?? "").trim().toLowerCase() === expected);
+}
+
+/** True for a header cell asking "which X are you ranking your preferences for?" — marks a groups-side form export. */
+function isRankingForColumn(headerCell: string | undefined): boolean {
+  return /ranking your preferences for/i.test(headerCell ?? "");
+}
+
+function parsePeopleFormRows(dataRows: string[][], errors: string[]): ParsedPersonRow[] {
+  const result: ParsedPersonRow[] = [];
+  dataRows.forEach((row, i) => {
+    const name = (row[4] ?? "").trim();
+    if (!name) {
+      errors.push(`Row ${i + 2}: missing person name`);
+      return;
+    }
+    const rankingNames = row
+      .slice(5)
+      .map((c) => c.trim())
+      .filter(Boolean);
+    result.push({ name, rankingNames });
+  });
+  return result;
+}
+
+/** Each row is one respondent's ranking for a team; capacity is absent, so rows are merged per team: capacity = row count, rankings = union in first-seen order. */
+function parseGroupsFormRows(dataRows: string[][], errors: string[]): ParsedGroupRow[] {
+  const byName = new Map<string, ParsedGroupRow>();
+  const order: string[] = [];
+  dataRows.forEach((row, i) => {
+    const name = (row[5] ?? "").trim();
+    if (!name) {
+      errors.push(`Row ${i + 2}: missing group name`);
+      return;
+    }
+    const rankingNames = row
+      .slice(6)
+      .map((c) => c.trim())
+      .filter(Boolean);
+    const key = normalizeNameKey(name);
+    const existing = byName.get(key);
+    if (existing) {
+      existing.capacity += 1;
+      for (const n of rankingNames) {
+        if (!existing.rankingNames.includes(n)) existing.rankingNames.push(n);
+      }
+    } else {
+      byName.set(key, { name, capacity: 1, rankingNames: [...rankingNames] });
+      order.push(key);
+    }
+  });
+  return order.map((key) => byName.get(key)!);
 }
 
 export function parsePeopleCsv(csvText: string): CsvParseResult<ParsedPersonRow> {
-  const { rows, errors } = parseRawRows(csvText);
+  const { header, rows: allRows, errors } = parseRawRows(csvText);
+  if (isFormsExportHeader(header) && !isRankingForColumn(header[5])) {
+    return { rows: parsePeopleFormRows(allRows.slice(1), errors), errors };
+  }
+  let rows = allRows;
+  if (rows.length > 0 && (rows[0][0] ?? "").trim().toLowerCase() === "name") {
+    rows = rows.slice(1);
+  }
   const result: ParsedPersonRow[] = [];
   rows.forEach((row, i) => {
     const name = (row[0] ?? "").trim();
@@ -48,7 +119,14 @@ export function parsePeopleCsv(csvText: string): CsvParseResult<ParsedPersonRow>
 }
 
 export function parseGroupsCsv(csvText: string): CsvParseResult<ParsedGroupRow> {
-  const { rows, errors } = parseRawRows(csvText);
+  const { header, rows: allRows, errors } = parseRawRows(csvText);
+  if (isFormsExportHeader(header) && isRankingForColumn(header[5])) {
+    return { rows: parseGroupsFormRows(allRows.slice(1), errors), errors };
+  }
+  let rows = allRows;
+  if (rows.length > 0 && (rows[0][0] ?? "").trim().toLowerCase() === "name") {
+    rows = rows.slice(1);
+  }
   const result: ParsedGroupRow[] = [];
   rows.forEach((row, i) => {
     const name = (row[0] ?? "").trim();
@@ -87,7 +165,7 @@ export function buildSessionEntities(
   const groupIdByName = new Map<string, string>();
   const groups: Group[] = [];
   for (const row of groupRows) {
-    const key = row.name.toLowerCase();
+    const key = normalizeNameKey(row.name);
     if (groupIdByName.has(key)) {
       warnings.push(`Duplicate group name "${row.name}" — ignoring duplicate row`);
       continue;
@@ -100,7 +178,7 @@ export function buildSessionEntities(
   const personIdByName = new Map<string, string>();
   const people: Person[] = [];
   for (const row of personRows) {
-    const key = row.name.toLowerCase();
+    const key = normalizeNameKey(row.name);
     if (personIdByName.has(key)) {
       warnings.push(`Duplicate person name "${row.name}" — ignoring duplicate row`);
       continue;
@@ -114,12 +192,12 @@ export function buildSessionEntities(
   const personById = new Map(people.map((p) => [p.id, p]));
 
   for (const row of personRows) {
-    const id = personIdByName.get(row.name.toLowerCase());
+    const id = personIdByName.get(normalizeNameKey(row.name));
     const person = id ? personById.get(id) : undefined;
     if (!person) continue;
     const rankings: string[] = [];
     for (const groupName of row.rankingNames) {
-      const groupId = groupIdByName.get(groupName.toLowerCase());
+      const groupId = groupIdByName.get(normalizeNameKey(groupName));
       if (!groupId) {
         warnings.push(`${row.name}: unknown group "${groupName}" in rankings — skipped`);
         continue;
@@ -130,12 +208,12 @@ export function buildSessionEntities(
   }
 
   for (const row of groupRows) {
-    const id = groupIdByName.get(row.name.toLowerCase());
+    const id = groupIdByName.get(normalizeNameKey(row.name));
     const group = id ? groupById.get(id) : undefined;
     if (!group) continue;
     const rankings: string[] = [];
     for (const personName of row.rankingNames) {
-      const personId = personIdByName.get(personName.toLowerCase());
+      const personId = personIdByName.get(normalizeNameKey(personName));
       if (!personId) {
         warnings.push(`${row.name}: unknown person "${personName}" in rankings — skipped`);
         continue;

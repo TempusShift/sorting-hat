@@ -51,6 +51,48 @@ describe("parseGroupsCsv", () => {
   });
 });
 
+describe("parsePeopleCsv — forms export", () => {
+  it("converts a Microsoft/Google Forms preference-survey export into person rows", () => {
+    const csv = [
+      "Id,Start time,Completion time,Email,Name,What is your FIRST choice team?,What is your SECOND choice team?,What is your THIRD choice team?",
+      "1,8/6/2026 12:49,8/6/2026 12:51,dina.bee@target.com,dina bee,Finance,Nova,Outbound",
+      "2,8/6/2026 12:24,8/6/2026 15:44,carson.tanner@target.com,carson tanner,Nova,Outbound,Finance",
+    ].join("\n");
+    const { rows, errors } = parsePeopleCsv(csv);
+    expect(errors).toEqual([]);
+    expect(rows).toEqual([
+      { name: "dina bee", rankingNames: ["Finance", "Nova", "Outbound"] },
+      { name: "carson tanner", rankingNames: ["Nova", "Outbound", "Finance"] },
+    ]);
+  });
+});
+
+describe("parseGroupsCsv — forms export", () => {
+  it("converts a manager preference-survey export into group rows with capacity 1 per respondent", () => {
+    const csv = [
+      "Id,Start time,Completion time,Email,Name,Which team are you ranking your preferences for?,Please select your 1st choice TLP,Please select your 2nd choice TLP",
+      "1,8/4/2026 12:30,8/4/2026 12:32,james.ess@target.com,james ess,Outbound,wavy june,dina bee",
+      "2,8/5/2026 15:28,8/5/2026 15:29,benson.callahan@target.com,benson callahan,Nova,carson tanner,dina bee",
+    ].join("\n");
+    const { rows, errors } = parseGroupsCsv(csv);
+    expect(errors).toEqual([]);
+    expect(rows).toEqual([
+      { name: "Outbound", capacity: 1, rankingNames: ["wavy june", "dina bee"] },
+      { name: "Nova", capacity: 1, rankingNames: ["carson tanner", "dina bee"] },
+    ]);
+  });
+
+  it("merges multiple respondents ranking the same team into one group with summed capacity", () => {
+    const csv = [
+      "Id,Start time,Completion time,Email,Name,Which team are you ranking your preferences for?,Please select your 1st choice TLP,Please select your 2nd choice TLP",
+      "1,8/4/2026 12:30,8/4/2026 12:32,a@x.com,a,Outbound,wavy june,dina bee",
+      "2,8/5/2026 15:28,8/5/2026 15:29,b@x.com,b,Outbound,dina bee,carson tanner",
+    ].join("\n");
+    const { rows } = parseGroupsCsv(csv);
+    expect(rows).toEqual([{ name: "Outbound", capacity: 2, rankingNames: ["wavy june", "dina bee", "carson tanner"] }]);
+  });
+});
+
 describe("buildSessionEntities", () => {
   it("links people and groups by name into id-based rankings", () => {
     const { people, groups, warnings } = buildSessionEntities(
