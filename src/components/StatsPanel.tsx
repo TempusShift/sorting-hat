@@ -12,6 +12,7 @@ interface StatsPanelProps {
   assignments: Assignment[];
   bumpedPersonIds?: string[];
   shiftedPersonIds?: string[];
+  backfilledPersonIds?: string[];
 }
 
 export function StatsPanel({
@@ -20,6 +21,7 @@ export function StatsPanel({
   assignments,
   bumpedPersonIds = [],
   shiftedPersonIds = [],
+  backfilledPersonIds = [],
 }: StatsPanelProps) {
   const assignmentByPerson = new Map(assignments.map((a) => [a.personId, a]));
   const ranks: number[] = [];
@@ -96,7 +98,7 @@ export function StatsPanel({
         </Card>
       </SimpleGrid>
 
-      {(bumpedPersonIds.length > 0 || shiftedPersonIds.length > 0) && (
+      {(bumpedPersonIds.length > 0 || shiftedPersonIds.length > 0 || backfilledPersonIds.length > 0) && (
         <Alert color="yellow" icon={<IconAlertTriangle size={16} />} title="Affected by contention">
           <Stack gap="xs">
             {bumpedPersonIds.length > 0 && (
@@ -125,6 +127,21 @@ export function StatsPanel({
                 </Text>
                 <List size="sm">
                   {shiftedPersonIds.map((id) => (
+                    <List.Item key={id}>{personNameById.get(id) ?? id}</List.Item>
+                  ))}
+                </List>
+              </div>
+            )}
+            {backfilledPersonIds.length > 0 && (
+              <div>
+                <Text size="sm" fw={500}>
+                  Backfilled into an open slot ({backfilledPersonIds.length})
+                </Text>
+                <Text size="xs" c="dimmed" mb={4}>
+                  Left unmatched by stable matching, then seated into remaining capacity via fillUnmatched.
+                </Text>
+                <List size="sm">
+                  {backfilledPersonIds.map((id) => (
                     <List.Item key={id}>{personNameById.get(id) ?? id}</List.Item>
                   ))}
                 </List>

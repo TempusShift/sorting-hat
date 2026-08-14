@@ -92,6 +92,7 @@ export function runGaleShapley(
   }
 
   const shifted = new Set<string>();
+  const backfilled = new Set<string>();
   if (options.fillUnmatched) {
     // Augmenting-path search (Kuhn's algorithm, capacitated): try to seat each
     // unmatched person by moving already-matched people to another group *they*
@@ -125,7 +126,7 @@ export function runGaleShapley(
 
     for (const p of people) {
       if (matchedGroup.get(p.id) !== null) continue;
-      tryPlace(p.id, new Set());
+      if (tryPlace(p.id, new Set())) backfilled.add(p.id);
     }
   }
 
@@ -139,6 +140,7 @@ export function runGaleShapley(
     runAt: new Date().toISOString(),
     bumpedPersonIds: [...bumped],
     shiftedPersonIds: [...shifted],
+    backfilledPersonIds: [...backfilled],
   };
 }
 

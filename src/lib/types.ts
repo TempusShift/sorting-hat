@@ -30,6 +30,8 @@ export interface MatchResult {
   bumpedPersonIds: string[];
   /** People moved to a different group they themselves ranked, to free a slot for someone else via fillUnmatched. */
   shiftedPersonIds: string[];
+  /** People left unmatched by stable matching who were seated into a group via fillUnmatched. */
+  backfilledPersonIds: string[];
 }
 
 export interface Assignment {
