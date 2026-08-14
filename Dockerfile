@@ -12,8 +12,7 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-RUN --mount=type=cache,id=next-cache,target=/app/.next/cache \
-  pnpm run build
+RUN pnpm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
