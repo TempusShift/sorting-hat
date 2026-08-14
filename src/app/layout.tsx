@@ -5,8 +5,9 @@ import "@mantine/charts/styles.css";
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { ColorSchemeScript, mantineHtmlProps, MantineProvider, Text } from "@mantine/core";
+import { Anchor, ColorSchemeScript, Group, mantineHtmlProps, MantineProvider, Stack, Text } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
+import { IconBrandGithub } from "@tabler/icons-react";
 import { theme } from "./theme";
 
 export const metadata: Metadata = {
@@ -24,9 +25,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MantineProvider theme={theme} defaultColorScheme="auto">
           <Notifications />
           {children}
-          <Text component="footer" size="xs" c="dimmed" ta="center" py="md">
-            No data is stored on a server — everything stays in your browser.
-          </Text>
+          <Stack component="footer" gap={4} align="center" py="md">
+            <Text size="xs" c="dimmed">
+              No data is stored on a server — everything stays in your browser.
+            </Text>
+            <Anchor href="https://github.com/TempusShift/sorting-hat" target="_blank" rel="noopener noreferrer" size="xs" c="dimmed">
+              <Group gap={4} wrap="nowrap">
+                <IconBrandGithub size={14} />
+                GitHub
+              </Group>
+            </Anchor>
+          </Stack>
         </MantineProvider>
       </body>
     </html>
