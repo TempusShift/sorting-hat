@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
+  ActionIcon,
   Alert,
   Box,
   Button,
@@ -20,14 +21,22 @@ import {
   TextInput,
   Title,
 } from "@mantine/core";
-import { IconAlertTriangle, IconArrowLeft, IconArrowRight, IconSparkles } from "@tabler/icons-react";
+import {
+  IconAlertTriangle,
+  IconArrowLeft,
+  IconArrowRight,
+  IconHome,
+  IconSparkles,
+} from "@tabler/icons-react";
 import { CsvDropzone } from "@/components/CsvDropzone";
 import { NewSessionButton } from "@/components/NewSessionButton";
 import { PreviewTable } from "@/components/PreviewTable";
 import {
   buildSessionEntities,
+  groupsToCsv,
   parseGroupsCsv,
   parsePeopleCsv,
+  peopleToCsv,
   type ParsedGroupRow,
   type ParsedPersonRow,
 } from "@/lib/csv";
@@ -99,6 +108,16 @@ export default function SetupPage() {
     return buildSessionEntities(personRows, groupRows);
   }, [personRows, groupRows]);
 
+  const existingPeopleCsv = useMemo(() => {
+    if (!session || session.people.length === 0) return undefined;
+    return peopleToCsv(session.people, session.groups);
+  }, [session]);
+
+  const existingGroupsCsv = useMemo(() => {
+    if (!session || session.groups.length === 0) return undefined;
+    return groupsToCsv(session.groups, session.people);
+  }, [session]);
+
   const reviewPeople: Person[] = imported?.people ?? session?.people ?? [];
   const reviewGroups: GroupEntity[] = imported?.groups ?? session?.groups ?? [];
   const warnings = imported?.warnings ?? [];
@@ -149,6 +168,9 @@ export default function SetupPage() {
     <Container size="md" py="xl">
       <Group justify="space-between" mb="xl">
         <Group gap="xs">
+          <ActionIcon component={Link} href="/" variant="default" size="lg" aria-label="Home">
+            <IconHome size={18} />
+          </ActionIcon>
           <IconSparkles size={24} />
           <Title order={2}>Set up: {session.name}</Title>
         </Group>
@@ -175,6 +197,7 @@ export default function SetupPage() {
                 description="name, then ranked group names"
                 fileName={personFileName}
                 formatExample={PEOPLE_CSV_EXAMPLE}
+                initialText={existingPeopleCsv}
                 onTextLoaded={handlePeopleFile}
               />
               <CsvDropzone
@@ -182,6 +205,7 @@ export default function SetupPage() {
                 description="name, capacity, then ranked person names (optional)"
                 fileName={groupFileName}
                 formatExample={GROUPS_CSV_EXAMPLE}
+                initialText={existingGroupsCsv}
                 onTextLoaded={handleGroupsFile}
               />
             </SimpleGrid>
@@ -235,13 +259,6 @@ export default function SetupPage() {
                   rows={groupRows.map((r) => [r.name, r.capacity, r.rankingNames.join(", ")])}
                 />
               </Box>
-            )}
-
-            {session.people.length > 0 && personRows.length === 0 && (
-              <Text size="sm" c="dimmed">
-                This session already has {session.people.length} people and {session.groups.length} groups saved.
-                Upload new CSVs to replace them, or continue to review the existing data.
-              </Text>
             )}
           </Stack>
         </Stepper.Step>

@@ -148,6 +148,22 @@ export function buildSessionEntities(
   return { people, groups, warnings };
 }
 
+export function peopleToCsv(people: Person[], groups: Group[]): string {
+  const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
+  const maxRankings = Math.max(0, ...people.map((p) => p.rankings.length));
+  const header = ["name", ...Array.from({ length: maxRankings }, (_, i) => `rank${i + 1}`)];
+  const rows = people.map((p) => [p.name, ...p.rankings.map((id) => groupNameById.get(id) ?? "")]);
+  return Papa.unparse([header, ...rows]);
+}
+
+export function groupsToCsv(groups: Group[], people: Person[]): string {
+  const personNameById = new Map(people.map((p) => [p.id, p.name]));
+  const maxRankings = Math.max(0, ...groups.map((g) => g.rankings.length));
+  const header = ["name", "capacity", ...Array.from({ length: maxRankings }, (_, i) => `rank${i + 1}`)];
+  const rows = groups.map((g) => [g.name, String(g.capacity), ...g.rankings.map((id) => personNameById.get(id) ?? "")]);
+  return Papa.unparse([header, ...rows]);
+}
+
 export function exportAssignmentsCsv(people: Person[], groups: Group[], assignments: Assignment[]): string {
   const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
   const personById = new Map(people.map((p) => [p.id, p]));

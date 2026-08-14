@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dropzone, MIME_TYPES } from "@mantine/dropzone";
 import { Button, Code, Group, SegmentedControl, Stack, Text, Textarea, ThemeIcon } from "@mantine/core";
 import { IconCheck, IconUpload } from "@tabler/icons-react";
@@ -10,13 +10,31 @@ interface CsvDropzoneProps {
   description?: string;
   fileName: string | null;
   formatExample: string;
+  /** Existing stored data to pre-load into the paste box for editing, e.g. when editing a session. */
+  initialText?: string;
   onTextLoaded: (text: string, source: string) => void;
 }
 
-export function CsvDropzone({ label, description, fileName, formatExample, onTextLoaded }: CsvDropzoneProps) {
-  const [mode, setMode] = useState<"file" | "paste">("file");
+export function CsvDropzone({
+  label,
+  description,
+  fileName,
+  formatExample,
+  initialText,
+  onTextLoaded,
+}: CsvDropzoneProps) {
+  const [mode, setMode] = useState<"file" | "paste">(initialText ? "paste" : "file");
   const [loading, setLoading] = useState(false);
-  const [pasteValue, setPasteValue] = useState("");
+  const [pasteValue, setPasteValue] = useState(initialText ?? "");
+  const appliedInitialRef = useRef(Boolean(initialText));
+
+  useEffect(() => {
+    if (initialText && !appliedInitialRef.current) {
+      appliedInitialRef.current = true;
+      setPasteValue(initialText);
+      setMode("paste");
+    }
+  }, [initialText]);
 
   function handleDrop(files: File[]) {
     const file = files[0];

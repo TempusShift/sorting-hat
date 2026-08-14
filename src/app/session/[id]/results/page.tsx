@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
+  ActionIcon,
   Alert,
   Box,
   Button,
@@ -23,6 +24,7 @@ import {
   IconDownload,
   IconEdit,
   IconGitCompare,
+  IconHome,
   IconListDetails,
   IconChartBar,
   IconShieldCheck,
@@ -107,7 +109,12 @@ export default function ResultsPage() {
   return (
     <Container size="lg" py="xl">
       <Group justify="space-between" mb="md" wrap="wrap">
-        <Title order={2}>{session.name}</Title>
+        <Group gap="xs">
+          <ActionIcon component={Link} href="/" variant="default" size="lg" aria-label="Home">
+            <IconHome size={18} />
+          </ActionIcon>
+          <Title order={2}>{session.name}</Title>
+        </Group>
         <Group gap="xs">
           <Button
             variant="default"
