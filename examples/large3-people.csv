@@ -1,0 +1,501 @@
+name,rank1,rank2,rank3,rank4,rank5,rank6,rank7,rank8
+Person 1,Team 54,Team 97,Team 87,Team 5,Team 100,Team 18,Team 98,Team 25
+Person 2,Team 95,Team 40,Team 45,Team 76,Team 33,Team 79,Team 5
+Person 3,Team 93,Team 52,Team 98,Team 21,Team 9,Team 72,Team 100,Team 10
+Person 4,Team 15,Team 93,Team 52,Team 100,Team 40,Team 12,Team 44,Team 88
+Person 5,Team 79,Team 32,Team 88,Team 69
+Person 6,Team 83,Team 99,Team 20,Team 17
+Person 7,Team 64,Team 82,Team 90,Team 39,Team 76,Team 83
+Person 8,Team 69,Team 17,Team 71,Team 15,Team 13,Team 20
+Person 9,Team 75,Team 44,Team 90,Team 20
+Person 10,Team 2,Team 26,Team 28,Team 58,Team 10,Team 100,Team 81,Team 67
+Person 11,Team 96,Team 44,Team 53,Team 47,Team 64,Team 95
+Person 12,Team 17,Team 96,Team 34,Team 62,Team 59,Team 89,Team 43,Team 16
+Person 13,Team 43,Team 47,Team 29,Team 9,Team 70,Team 25,Team 83
+Person 14,Team 59,Team 91,Team 41,Team 38,Team 32,Team 21,Team 87
+Person 15,Team 36,Team 90,Team 20,Team 86
+Person 16,Team 60,Team 28,Team 53,Team 44,Team 14
+Person 17,Team 83,Team 25,Team 29,Team 87,Team 60
+Person 18,Team 24,Team 52,Team 42,Team 79,Team 48
+Person 19,Team 99,Team 69,Team 56,Team 70,Team 23,Team 1,Team 18,Team 45
+Person 20,Team 21,Team 95,Team 22,Team 19,Team 45,Team 84,Team 39,Team 44
+Person 21,Team 10,Team 63,Team 9,Team 39,Team 92,Team 79
+Person 22,Team 94,Team 62,Team 100,Team 23,Team 91,Team 95,Team 4,Team 45
+Person 23,Team 22,Team 53,Team 73,Team 6,Team 55,Team 50,Team 66,Team 49
+Person 24,Team 73,Team 95,Team 82,Team 57,Team 34,Team 22
+Person 25,Team 15,Team 98,Team 12,Team 23,Team 19,Team 96,Team 25,Team 52
+Person 26,Team 88,Team 76,Team 26,Team 23,Team 8,Team 49,Team 67,Team 64
+Person 27,Team 83,Team 11,Team 49,Team 32
+Person 28,Team 60,Team 79,Team 49,Team 66,Team 95,Team 98,Team 62
+Person 29,Team 52,Team 88,Team 82,Team 97,Team 9
+Person 30,Team 47,Team 25,Team 95,Team 41,Team 10
+Person 31,Team 17,Team 90,Team 6,Team 32,Team 4,Team 30
+Person 32,Team 88,Team 41,Team 89,Team 35,Team 95,Team 94,Team 82,Team 74
+Person 33,Team 5,Team 1,Team 24,Team 97
+Person 34,Team 18,Team 32,Team 73,Team 89,Team 95,Team 6
+Person 35,Team 15,Team 23,Team 92,Team 97,Team 14,Team 10,Team 5,Team 55
+Person 36,Team 51,Team 95,Team 25,Team 43,Team 33,Team 58
+Person 37,Team 99,Team 2,Team 21,Team 49
+Person 38,Team 42,Team 92,Team 32,Team 33
+Person 39,Team 98,Team 44,Team 41,Team 61
+Person 40,Team 38,Team 40,Team 14,Team 27,Team 18
+Person 41,Team 27,Team 24,Team 40,Team 35,Team 11,Team 89
+Person 42,Team 29,Team 69,Team 64,Team 55
+Person 43,Team 7,Team 45,Team 63,Team 69,Team 37,Team 79,Team 97
+Person 44,Team 10,Team 30,Team 21,Team 22,Team 85
+Person 45,Team 34,Team 54,Team 94,Team 81,Team 65
+Person 46,Team 29,Team 72,Team 20,Team 38,Team 87,Team 50,Team 100
+Person 47,Team 67,Team 77,Team 29,Team 43,Team 45,Team 34,Team 52,Team 15
+Person 48,Team 14,Team 58,Team 35,Team 40,Team 12
+Person 49,Team 65,Team 79,Team 87,Team 78,Team 7,Team 81,Team 63,Team 57
+Person 50,Team 92,Team 17,Team 40,Team 90,Team 74,Team 9,Team 89,Team 69
+Person 51,Team 8,Team 7,Team 40,Team 14
+Person 52,Team 91,Team 94,Team 35,Team 73,Team 80,Team 85,Team 56
+Person 53,Team 17,Team 41,Team 51,Team 83,Team 85
+Person 54,Team 36,Team 49,Team 47,Team 19
+Person 55,Team 79,Team 73,Team 6,Team 3,Team 60
+Person 56,Team 100,Team 40,Team 92,Team 54,Team 83,Team 90,Team 35,Team 47
+Person 57,Team 82,Team 81,Team 10,Team 5
+Person 58,Team 24,Team 61,Team 2,Team 9,Team 67,Team 46,Team 37,Team 17
+Person 59,Team 31,Team 20,Team 57,Team 32,Team 96,Team 28,Team 56
+Person 60,Team 74,Team 54,Team 45,Team 81,Team 68,Team 33,Team 44
+Person 61,Team 46,Team 44,Team 69,Team 73,Team 22,Team 95
+Person 62,Team 73,Team 75,Team 62,Team 95
+Person 63,Team 61,Team 86,Team 10,Team 82,Team 12,Team 42,Team 69
+Person 64,Team 91,Team 7,Team 16,Team 55,Team 53,Team 63
+Person 65,Team 58,Team 55,Team 23,Team 62,Team 21,Team 34,Team 35,Team 91
+Person 66,Team 88,Team 73,Team 52,Team 35
+Person 67,Team 27,Team 30,Team 41,Team 89,Team 75,Team 97,Team 51,Team 39
+Person 68,Team 92,Team 81,Team 55,Team 31,Team 60,Team 26
+Person 69,Team 32,Team 43,Team 64,Team 59
+Person 70,Team 67,Team 93,Team 84,Team 31,Team 34,Team 2,Team 50
+Person 71,Team 28,Team 11,Team 48,Team 60,Team 83
+Person 72,Team 35,Team 15,Team 74,Team 48,Team 99,Team 28
+Person 73,Team 13,Team 32,Team 27,Team 89,Team 98,Team 44,Team 99,Team 29
+Person 74,Team 84,Team 52,Team 75,Team 77,Team 63,Team 2,Team 73,Team 69
+Person 75,Team 17,Team 69,Team 85,Team 53
+Person 76,Team 96,Team 52,Team 58,Team 25
+Person 77,Team 88,Team 76,Team 80,Team 48,Team 66
+Person 78,Team 29,Team 8,Team 86,Team 32
+Person 79,Team 99,Team 40,Team 7,Team 54,Team 97
+Person 80,Team 92,Team 28,Team 32,Team 40,Team 61,Team 37,Team 66
+Person 81,Team 56,Team 4,Team 44,Team 42,Team 64,Team 92,Team 91,Team 24
+Person 82,Team 8,Team 92,Team 40,Team 68,Team 65,Team 67
+Person 83,Team 99,Team 9,Team 4,Team 83,Team 27,Team 58,Team 98
+Person 84,Team 31,Team 61,Team 91,Team 80,Team 21,Team 75
+Person 85,Team 90,Team 62,Team 63,Team 6
+Person 86,Team 48,Team 66,Team 92,Team 17,Team 50,Team 35,Team 4
+Person 87,Team 73,Team 91,Team 28,Team 75
+Person 88,Team 67,Team 18,Team 55,Team 56,Team 50
+Person 89,Team 77,Team 25,Team 31,Team 88,Team 6
+Person 90,Team 54,Team 88,Team 85,Team 48,Team 20,Team 82
+Person 91,Team 96,Team 35,Team 84,Team 99,Team 79,Team 43,Team 30,Team 5
+Person 92,Team 2,Team 85,Team 4,Team 81,Team 22,Team 59,Team 76
+Person 93,Team 37,Team 36,Team 23,Team 99
+Person 94,Team 44,Team 68,Team 45,Team 56,Team 39,Team 57,Team 76,Team 17
+Person 95,Team 58,Team 91,Team 69,Team 93,Team 32,Team 57,Team 25,Team 2
+Person 96,Team 73,Team 51,Team 48,Team 85,Team 28
+Person 97,Team 17,Team 65,Team 72,Team 44,Team 48
+Person 98,Team 38,Team 49,Team 93,Team 84,Team 74,Team 69,Team 40,Team 23
+Person 99,Team 80,Team 55,Team 79,Team 75,Team 53,Team 58,Team 51,Team 62
+Person 100,Team 68,Team 94,Team 50,Team 22,Team 1,Team 40,Team 38
+Person 101,Team 49,Team 62,Team 23,Team 32
+Person 102,Team 58,Team 48,Team 3,Team 47
+Person 103,Team 81,Team 97,Team 87,Team 74,Team 6
+Person 104,Team 39,Team 53,Team 75,Team 16,Team 34,Team 12
+Person 105,Team 89,Team 79,Team 96,Team 21,Team 70,Team 28
+Person 106,Team 53,Team 4,Team 14,Team 80,Team 78,Team 72,Team 79
+Person 107,Team 44,Team 45,Team 51,Team 58
+Person 108,Team 15,Team 87,Team 55,Team 34
+Person 109,Team 42,Team 94,Team 28,Team 47
+Person 110,Team 65,Team 70,Team 87,Team 35,Team 75,Team 45,Team 64,Team 73
+Person 111,Team 61,Team 72,Team 12,Team 1
+Person 112,Team 49,Team 10,Team 8,Team 70,Team 78,Team 94,Team 45,Team 54
+Person 113,Team 84,Team 40,Team 39,Team 50,Team 41
+Person 114,Team 41,Team 100,Team 5,Team 29,Team 54
+Person 115,Team 85,Team 46,Team 80,Team 95
+Person 116,Team 86,Team 38,Team 61,Team 75,Team 17
+Person 117,Team 98,Team 73,Team 90,Team 64
+Person 118,Team 89,Team 34,Team 45,Team 86,Team 32,Team 39,Team 71
+Person 119,Team 83,Team 56,Team 97,Team 36,Team 49,Team 54
+Person 120,Team 71,Team 47,Team 57,Team 67,Team 51,Team 15,Team 13,Team 68
+Person 121,Team 32,Team 21,Team 2,Team 34,Team 55,Team 5,Team 30
+Person 122,Team 100,Team 10,Team 52,Team 92,Team 18
+Person 123,Team 49,Team 5,Team 18,Team 69
+Person 124,Team 57,Team 6,Team 31,Team 41,Team 90,Team 55
+Person 125,Team 53,Team 34,Team 43,Team 38
+Person 126,Team 10,Team 31,Team 79,Team 23,Team 100
+Person 127,Team 43,Team 95,Team 13,Team 98,Team 19,Team 82,Team 75,Team 62
+Person 128,Team 43,Team 60,Team 78,Team 53,Team 52
+Person 129,Team 54,Team 30,Team 70,Team 77,Team 75,Team 58,Team 22
+Person 130,Team 46,Team 89,Team 92,Team 95,Team 100,Team 98
+Person 131,Team 86,Team 80,Team 31,Team 46,Team 82,Team 100,Team 16,Team 84
+Person 132,Team 6,Team 35,Team 1,Team 72,Team 45,Team 29,Team 58
+Person 133,Team 28,Team 83,Team 63,Team 18,Team 7
+Person 134,Team 68,Team 100,Team 30,Team 65,Team 94,Team 64,Team 10
+Person 135,Team 66,Team 87,Team 75,Team 28,Team 99,Team 80,Team 95
+Person 136,Team 93,Team 58,Team 54,Team 16,Team 42
+Person 137,Team 97,Team 90,Team 58,Team 20,Team 81,Team 43
+Person 138,Team 49,Team 50,Team 25,Team 71,Team 6,Team 21,Team 91,Team 48
+Person 139,Team 37,Team 32,Team 85,Team 90,Team 83,Team 95
+Person 140,Team 63,Team 44,Team 4,Team 36,Team 10
+Person 141,Team 47,Team 15,Team 31,Team 71,Team 48,Team 69
+Person 142,Team 6,Team 52,Team 62,Team 17,Team 68
+Person 143,Team 97,Team 81,Team 1,Team 83
+Person 144,Team 6,Team 28,Team 100,Team 52,Team 54,Team 83,Team 13,Team 88
+Person 145,Team 29,Team 58,Team 60,Team 96,Team 18,Team 78
+Person 146,Team 44,Team 41,Team 97,Team 51,Team 80,Team 4,Team 76,Team 83
+Person 147,Team 67,Team 90,Team 18,Team 1,Team 29,Team 16
+Person 148,Team 7,Team 17,Team 46,Team 48,Team 79
+Person 149,Team 45,Team 62,Team 67,Team 36
+Person 150,Team 27,Team 65,Team 49,Team 30,Team 26,Team 50,Team 92
+Person 151,Team 37,Team 90,Team 54,Team 55
+Person 152,Team 88,Team 93,Team 29,Team 44
+Person 153,Team 51,Team 29,Team 99,Team 45,Team 49,Team 64,Team 88,Team 20
+Person 154,Team 20,Team 5,Team 21,Team 44
+Person 155,Team 43,Team 83,Team 61,Team 14,Team 22,Team 46,Team 91,Team 39
+Person 156,Team 71,Team 35,Team 22,Team 83,Team 52,Team 72
+Person 157,Team 98,Team 91,Team 63,Team 74,Team 40,Team 99,Team 72
+Person 158,Team 32,Team 12,Team 17,Team 100,Team 19
+Person 159,Team 22,Team 37,Team 10,Team 75,Team 38,Team 16,Team 27,Team 64
+Person 160,Team 46,Team 36,Team 31,Team 19
+Person 161,Team 74,Team 58,Team 55,Team 13,Team 70,Team 91,Team 99,Team 22
+Person 162,Team 18,Team 65,Team 12,Team 80
+Person 163,Team 15,Team 84,Team 47,Team 91,Team 65,Team 62,Team 75,Team 96
+Person 164,Team 83,Team 90,Team 12,Team 36
+Person 165,Team 24,Team 71,Team 76,Team 98
+Person 166,Team 57,Team 83,Team 6,Team 51,Team 77,Team 26,Team 20,Team 87
+Person 167,Team 36,Team 63,Team 100,Team 91
+Person 168,Team 88,Team 47,Team 18,Team 57,Team 12,Team 86
+Person 169,Team 65,Team 16,Team 63,Team 28,Team 81,Team 25,Team 31
+Person 170,Team 78,Team 17,Team 54,Team 3,Team 92,Team 19,Team 31,Team 93
+Person 171,Team 8,Team 22,Team 56,Team 9,Team 21,Team 46,Team 53,Team 27
+Person 172,Team 27,Team 73,Team 3,Team 10,Team 32
+Person 173,Team 18,Team 15,Team 53,Team 96,Team 3,Team 7,Team 43
+Person 174,Team 75,Team 81,Team 7,Team 69,Team 52,Team 14,Team 78
+Person 175,Team 60,Team 42,Team 65,Team 33,Team 62,Team 44,Team 19
+Person 176,Team 33,Team 73,Team 82,Team 94,Team 45,Team 40
+Person 177,Team 68,Team 65,Team 13,Team 96
+Person 178,Team 39,Team 40,Team 46,Team 92,Team 96,Team 90,Team 42,Team 27
+Person 179,Team 51,Team 96,Team 71,Team 19,Team 4,Team 98,Team 5
+Person 180,Team 16,Team 61,Team 69,Team 94,Team 93
+Person 181,Team 86,Team 14,Team 28,Team 92,Team 43,Team 30,Team 35,Team 15
+Person 182,Team 7,Team 82,Team 66,Team 23,Team 50,Team 10
+Person 183,Team 67,Team 86,Team 25,Team 26,Team 83,Team 85,Team 35,Team 33
+Person 184,Team 19,Team 26,Team 58,Team 99,Team 6,Team 54,Team 76
+Person 185,Team 44,Team 67,Team 90,Team 100
+Person 186,Team 80,Team 86,Team 18,Team 37,Team 8,Team 59
+Person 187,Team 85,Team 3,Team 42,Team 98,Team 75,Team 36,Team 33
+Person 188,Team 84,Team 63,Team 69,Team 15,Team 87
+Person 189,Team 94,Team 11,Team 91,Team 95,Team 61,Team 26
+Person 190,Team 99,Team 29,Team 77,Team 65,Team 60,Team 48,Team 37,Team 80
+Person 191,Team 64,Team 82,Team 87,Team 74
+Person 192,Team 38,Team 36,Team 77,Team 6,Team 22,Team 50
+Person 193,Team 69,Team 80,Team 85,Team 36,Team 18,Team 89,Team 75,Team 54
+Person 194,Team 75,Team 13,Team 44,Team 30,Team 19,Team 52,Team 79,Team 29
+Person 195,Team 70,Team 21,Team 12,Team 83,Team 52,Team 45,Team 3
+Person 196,Team 28,Team 12,Team 61,Team 63,Team 7,Team 94
+Person 197,Team 82,Team 6,Team 21,Team 60,Team 53,Team 11
+Person 198,Team 81,Team 83,Team 93,Team 95,Team 41,Team 5
+Person 199,Team 38,Team 18,Team 92,Team 59,Team 94,Team 76,Team 14
+Person 200,Team 17,Team 61,Team 55,Team 49,Team 87
+Person 201,Team 26,Team 87,Team 74,Team 91,Team 97,Team 2,Team 35,Team 14
+Person 202,Team 34,Team 64,Team 85,Team 29
+Person 203,Team 89,Team 84,Team 18,Team 4
+Person 204,Team 97,Team 53,Team 98,Team 5,Team 1,Team 76,Team 88,Team 28
+Person 205,Team 28,Team 16,Team 45,Team 79,Team 25
+Person 206,Team 47,Team 29,Team 15,Team 35,Team 59
+Person 207,Team 7,Team 95,Team 62,Team 16,Team 42,Team 22
+Person 208,Team 68,Team 62,Team 6,Team 7,Team 13,Team 80,Team 48
+Person 209,Team 4,Team 41,Team 37,Team 39,Team 58,Team 25,Team 48
+Person 210,Team 91,Team 35,Team 16,Team 54,Team 27,Team 45,Team 79,Team 53
+Person 211,Team 81,Team 57,Team 47,Team 9,Team 99,Team 30,Team 96
+Person 212,Team 88,Team 59,Team 98,Team 31,Team 25,Team 18
+Person 213,Team 80,Team 99,Team 48,Team 15,Team 34,Team 53,Team 10
+Person 214,Team 71,Team 76,Team 8,Team 66,Team 99,Team 63,Team 79,Team 39
+Person 215,Team 100,Team 7,Team 17,Team 51,Team 13,Team 12,Team 90,Team 89
+Person 216,Team 18,Team 33,Team 43,Team 83,Team 78,Team 10,Team 85,Team 89
+Person 217,Team 61,Team 86,Team 52,Team 90,Team 54,Team 98
+Person 218,Team 38,Team 98,Team 1,Team 15,Team 43,Team 71
+Person 219,Team 67,Team 29,Team 71,Team 73,Team 86,Team 16,Team 72
+Person 220,Team 18,Team 94,Team 42,Team 69,Team 60
+Person 221,Team 2,Team 12,Team 96,Team 36
+Person 222,Team 81,Team 66,Team 90,Team 92,Team 65
+Person 223,Team 70,Team 56,Team 50,Team 61
+Person 224,Team 27,Team 9,Team 4,Team 18,Team 21,Team 50,Team 64
+Person 225,Team 15,Team 8,Team 57,Team 28
+Person 226,Team 72,Team 26,Team 36,Team 3,Team 75,Team 40,Team 100
+Person 227,Team 31,Team 97,Team 85,Team 48,Team 70,Team 59
+Person 228,Team 12,Team 9,Team 50,Team 90
+Person 229,Team 34,Team 19,Team 11,Team 45,Team 75,Team 62
+Person 230,Team 28,Team 11,Team 17,Team 56
+Person 231,Team 59,Team 37,Team 58,Team 49
+Person 232,Team 64,Team 68,Team 45,Team 63,Team 35,Team 14
+Person 233,Team 55,Team 3,Team 89,Team 30,Team 9,Team 33,Team 51,Team 28
+Person 234,Team 87,Team 37,Team 59,Team 3,Team 98,Team 56,Team 82
+Person 235,Team 24,Team 39,Team 59,Team 4
+Person 236,Team 78,Team 73,Team 24,Team 9
+Person 237,Team 100,Team 27,Team 18,Team 5,Team 44,Team 54
+Person 238,Team 26,Team 28,Team 95,Team 12,Team 75,Team 15,Team 47,Team 2
+Person 239,Team 64,Team 68,Team 34,Team 26,Team 52,Team 83,Team 48,Team 70
+Person 240,Team 96,Team 6,Team 16,Team 98,Team 5,Team 22
+Person 241,Team 77,Team 12,Team 84,Team 53,Team 97,Team 70
+Person 242,Team 92,Team 94,Team 76,Team 79,Team 68,Team 88
+Person 243,Team 74,Team 69,Team 59,Team 66,Team 24
+Person 244,Team 46,Team 76,Team 59,Team 52,Team 1,Team 6,Team 26
+Person 245,Team 11,Team 94,Team 38,Team 96,Team 58,Team 84,Team 91
+Person 246,Team 27,Team 93,Team 58,Team 1,Team 45,Team 28,Team 15
+Person 247,Team 16,Team 99,Team 44,Team 58
+Person 248,Team 56,Team 21,Team 44,Team 42,Team 76,Team 2,Team 51,Team 93
+Person 249,Team 25,Team 90,Team 88,Team 16,Team 30
+Person 250,Team 75,Team 46,Team 11,Team 4,Team 79,Team 69
+Person 251,Team 1,Team 59,Team 21,Team 91,Team 85,Team 53,Team 12,Team 89
+Person 252,Team 94,Team 81,Team 59,Team 95
+Person 253,Team 15,Team 74,Team 26,Team 47,Team 2
+Person 254,Team 20,Team 6,Team 65,Team 80,Team 39,Team 56,Team 63
+Person 255,Team 42,Team 44,Team 26,Team 8,Team 30,Team 70,Team 43
+Person 256,Team 71,Team 68,Team 7,Team 8
+Person 257,Team 4,Team 22,Team 57,Team 17,Team 16,Team 14
+Person 258,Team 60,Team 78,Team 40,Team 18,Team 23,Team 86,Team 47,Team 49
+Person 259,Team 67,Team 61,Team 59,Team 27,Team 70,Team 41,Team 89,Team 25
+Person 260,Team 96,Team 90,Team 74,Team 4,Team 61
+Person 261,Team 56,Team 16,Team 78,Team 26,Team 89,Team 38,Team 82
+Person 262,Team 24,Team 66,Team 32,Team 16
+Person 263,Team 55,Team 35,Team 42,Team 37
+Person 264,Team 53,Team 25,Team 64,Team 86,Team 51,Team 27
+Person 265,Team 28,Team 63,Team 78,Team 21,Team 46,Team 1,Team 77,Team 30
+Person 266,Team 66,Team 70,Team 52,Team 40,Team 2,Team 76,Team 78,Team 24
+Person 267,Team 73,Team 85,Team 25,Team 33,Team 35
+Person 268,Team 21,Team 54,Team 58,Team 30,Team 55,Team 38
+Person 269,Team 74,Team 76,Team 61,Team 31,Team 20
+Person 270,Team 91,Team 80,Team 82,Team 51
+Person 271,Team 16,Team 65,Team 79,Team 98
+Person 272,Team 3,Team 59,Team 75,Team 96,Team 86,Team 5
+Person 273,Team 54,Team 81,Team 36,Team 84,Team 58,Team 40,Team 8
+Person 274,Team 39,Team 75,Team 79,Team 6
+Person 275,Team 60,Team 55,Team 19,Team 22,Team 2,Team 87
+Person 276,Team 52,Team 74,Team 4,Team 17,Team 87,Team 35,Team 6,Team 47
+Person 277,Team 16,Team 53,Team 95,Team 63,Team 99,Team 20,Team 47
+Person 278,Team 41,Team 75,Team 10,Team 56
+Person 279,Team 18,Team 58,Team 74,Team 71,Team 46,Team 96
+Person 280,Team 76,Team 5,Team 14,Team 50,Team 58,Team 15,Team 63,Team 54
+Person 281,Team 12,Team 87,Team 58,Team 61
+Person 282,Team 80,Team 9,Team 64,Team 65
+Person 283,Team 1,Team 16,Team 92,Team 37,Team 67,Team 10,Team 41,Team 70
+Person 284,Team 47,Team 16,Team 20,Team 96,Team 17,Team 18,Team 58
+Person 285,Team 47,Team 65,Team 62,Team 16,Team 40
+Person 286,Team 27,Team 38,Team 92,Team 25,Team 39,Team 20,Team 29,Team 32
+Person 287,Team 87,Team 75,Team 64,Team 57
+Person 288,Team 56,Team 46,Team 24,Team 45,Team 70,Team 95,Team 86,Team 36
+Person 289,Team 100,Team 48,Team 4,Team 95
+Person 290,Team 2,Team 32,Team 92,Team 7
+Person 291,Team 69,Team 70,Team 94,Team 72,Team 37,Team 41,Team 91
+Person 292,Team 89,Team 50,Team 37,Team 51,Team 97
+Person 293,Team 34,Team 27,Team 29,Team 40,Team 84,Team 73,Team 81
+Person 294,Team 91,Team 43,Team 98,Team 58,Team 53,Team 20
+Person 295,Team 11,Team 53,Team 93,Team 81,Team 88,Team 14,Team 47
+Person 296,Team 59,Team 46,Team 65,Team 10
+Person 297,Team 91,Team 73,Team 81,Team 38,Team 39,Team 84,Team 86
+Person 298,Team 4,Team 92,Team 24,Team 10
+Person 299,Team 22,Team 100,Team 46,Team 78,Team 73,Team 42,Team 87,Team 69
+Person 300,Team 17,Team 46,Team 98,Team 56,Team 59,Team 94,Team 41
+Person 301,Team 59,Team 62,Team 31,Team 73,Team 67,Team 60,Team 80
+Person 302,Team 21,Team 67,Team 68,Team 66,Team 99,Team 96,Team 23,Team 25
+Person 303,Team 62,Team 23,Team 98,Team 48,Team 21,Team 84
+Person 304,Team 58,Team 44,Team 49,Team 28,Team 33,Team 6,Team 60,Team 83
+Person 305,Team 71,Team 29,Team 55,Team 44,Team 5,Team 37
+Person 306,Team 56,Team 32,Team 72,Team 96,Team 80
+Person 307,Team 19,Team 76,Team 84,Team 39,Team 62,Team 18,Team 47
+Person 308,Team 34,Team 9,Team 47,Team 31,Team 37
+Person 309,Team 65,Team 28,Team 85,Team 88,Team 43,Team 15,Team 49,Team 68
+Person 310,Team 54,Team 42,Team 94,Team 31,Team 50,Team 5
+Person 311,Team 99,Team 8,Team 20,Team 17,Team 97,Team 54,Team 98
+Person 312,Team 12,Team 87,Team 51,Team 40,Team 91,Team 77
+Person 313,Team 25,Team 42,Team 13,Team 71,Team 72
+Person 314,Team 28,Team 52,Team 13,Team 95
+Person 315,Team 88,Team 93,Team 63,Team 79,Team 36
+Person 316,Team 66,Team 70,Team 85,Team 60,Team 92,Team 37,Team 94
+Person 317,Team 19,Team 69,Team 8,Team 2
+Person 318,Team 22,Team 51,Team 24,Team 12,Team 13
+Person 319,Team 19,Team 1,Team 88,Team 94,Team 12,Team 83,Team 11
+Person 320,Team 67,Team 91,Team 100,Team 5,Team 20,Team 96,Team 17
+Person 321,Team 55,Team 59,Team 9,Team 33,Team 96,Team 93,Team 23,Team 62
+Person 322,Team 20,Team 73,Team 43,Team 56,Team 89,Team 97
+Person 323,Team 19,Team 1,Team 82,Team 94
+Person 324,Team 42,Team 93,Team 31,Team 35,Team 81,Team 26,Team 45
+Person 325,Team 86,Team 35,Team 99,Team 22,Team 76,Team 6,Team 11
+Person 326,Team 19,Team 28,Team 42,Team 6,Team 38,Team 3,Team 89
+Person 327,Team 33,Team 66,Team 13,Team 54,Team 87,Team 23,Team 96,Team 16
+Person 328,Team 23,Team 2,Team 33,Team 98
+Person 329,Team 4,Team 91,Team 42,Team 45
+Person 330,Team 44,Team 65,Team 78,Team 20
+Person 331,Team 7,Team 34,Team 12,Team 53,Team 11
+Person 332,Team 52,Team 84,Team 59,Team 36,Team 28,Team 43
+Person 333,Team 12,Team 33,Team 23,Team 80,Team 66
+Person 334,Team 28,Team 94,Team 61,Team 27,Team 36
+Person 335,Team 8,Team 20,Team 92,Team 40,Team 99,Team 45,Team 4
+Person 336,Team 82,Team 68,Team 29,Team 12,Team 93
+Person 337,Team 54,Team 82,Team 49,Team 1,Team 13,Team 46,Team 71
+Person 338,Team 38,Team 8,Team 85,Team 34,Team 6
+Person 339,Team 70,Team 48,Team 91,Team 85,Team 30,Team 23,Team 17,Team 50
+Person 340,Team 5,Team 54,Team 75,Team 16,Team 98,Team 83,Team 24
+Person 341,Team 41,Team 99,Team 38,Team 1
+Person 342,Team 43,Team 97,Team 65,Team 69
+Person 343,Team 55,Team 88,Team 6,Team 14,Team 89
+Person 344,Team 94,Team 4,Team 56,Team 50
+Person 345,Team 88,Team 45,Team 76,Team 20
+Person 346,Team 68,Team 53,Team 75,Team 18,Team 62
+Person 347,Team 23,Team 93,Team 19,Team 50
+Person 348,Team 38,Team 46,Team 96,Team 24,Team 59,Team 1,Team 63,Team 64
+Person 349,Team 35,Team 66,Team 54,Team 36,Team 6,Team 77
+Person 350,Team 92,Team 68,Team 29,Team 23,Team 54,Team 64
+Person 351,Team 67,Team 17,Team 37,Team 39
+Person 352,Team 53,Team 6,Team 65,Team 46,Team 21,Team 68,Team 76
+Person 353,Team 73,Team 26,Team 16,Team 58
+Person 354,Team 43,Team 37,Team 15,Team 52,Team 45,Team 12
+Person 355,Team 16,Team 6,Team 59,Team 63,Team 52,Team 26
+Person 356,Team 93,Team 19,Team 66,Team 65,Team 79,Team 73
+Person 357,Team 88,Team 100,Team 89,Team 47,Team 10,Team 94,Team 82,Team 18
+Person 358,Team 17,Team 96,Team 89,Team 48,Team 2,Team 20,Team 92,Team 4
+Person 359,Team 83,Team 50,Team 61,Team 95,Team 71,Team 43
+Person 360,Team 99,Team 52,Team 48,Team 77,Team 30
+Person 361,Team 25,Team 64,Team 28,Team 79,Team 58,Team 3,Team 20,Team 100
+Person 362,Team 100,Team 28,Team 97,Team 23,Team 94,Team 85,Team 53
+Person 363,Team 29,Team 37,Team 65,Team 11
+Person 364,Team 42,Team 82,Team 13,Team 26,Team 57
+Person 365,Team 60,Team 96,Team 6,Team 44,Team 14
+Person 366,Team 55,Team 97,Team 65,Team 78,Team 25,Team 13,Team 8
+Person 367,Team 19,Team 43,Team 57,Team 11,Team 74,Team 79,Team 84,Team 10
+Person 368,Team 67,Team 43,Team 26,Team 30,Team 34,Team 21,Team 51,Team 48
+Person 369,Team 79,Team 97,Team 83,Team 3,Team 81,Team 92,Team 38,Team 44
+Person 370,Team 43,Team 46,Team 90,Team 83,Team 13,Team 44
+Person 371,Team 68,Team 70,Team 71,Team 32
+Person 372,Team 18,Team 19,Team 10,Team 63,Team 75,Team 14,Team 95,Team 58
+Person 373,Team 54,Team 17,Team 58,Team 91
+Person 374,Team 50,Team 72,Team 44,Team 99,Team 52,Team 40
+Person 375,Team 16,Team 22,Team 92,Team 56
+Person 376,Team 68,Team 77,Team 63,Team 82
+Person 377,Team 49,Team 71,Team 65,Team 80
+Person 378,Team 16,Team 33,Team 42,Team 36,Team 8,Team 57
+Person 379,Team 74,Team 12,Team 22,Team 94,Team 32,Team 43,Team 98
+Person 380,Team 2,Team 53,Team 14,Team 86,Team 34,Team 4,Team 83,Team 59
+Person 381,Team 68,Team 53,Team 63,Team 51,Team 84,Team 82
+Person 382,Team 5,Team 28,Team 6,Team 99,Team 35,Team 80
+Person 383,Team 38,Team 84,Team 66,Team 86,Team 92,Team 18,Team 69,Team 6
+Person 384,Team 86,Team 43,Team 65,Team 70,Team 29,Team 56
+Person 385,Team 49,Team 73,Team 89,Team 14,Team 84
+Person 386,Team 36,Team 32,Team 96,Team 71,Team 9,Team 91
+Person 387,Team 45,Team 21,Team 16,Team 34
+Person 388,Team 12,Team 42,Team 33,Team 2,Team 60,Team 52
+Person 389,Team 15,Team 62,Team 7,Team 29,Team 98,Team 87,Team 54
+Person 390,Team 98,Team 77,Team 36,Team 27,Team 91,Team 94,Team 29,Team 39
+Person 391,Team 91,Team 67,Team 60,Team 93,Team 27,Team 15
+Person 392,Team 98,Team 88,Team 100,Team 9,Team 81
+Person 393,Team 26,Team 99,Team 91,Team 7,Team 61,Team 38,Team 8,Team 100
+Person 394,Team 55,Team 94,Team 81,Team 39,Team 33
+Person 395,Team 72,Team 59,Team 81,Team 8
+Person 396,Team 22,Team 33,Team 46,Team 43,Team 41,Team 85,Team 86
+Person 397,Team 12,Team 83,Team 35,Team 72,Team 9
+Person 398,Team 33,Team 100,Team 44,Team 32,Team 59,Team 96,Team 41
+Person 399,Team 11,Team 98,Team 40,Team 84,Team 89,Team 96,Team 20
+Person 400,Team 39,Team 69,Team 35,Team 21
+Person 401,Team 2,Team 51,Team 63,Team 54,Team 53,Team 37
+Person 402,Team 6,Team 58,Team 18,Team 87,Team 90,Team 52,Team 88,Team 19
+Person 403,Team 29,Team 26,Team 69,Team 66,Team 95,Team 7
+Person 404,Team 46,Team 31,Team 26,Team 87,Team 96,Team 50
+Person 405,Team 5,Team 31,Team 81,Team 86,Team 99,Team 96
+Person 406,Team 94,Team 25,Team 58,Team 2,Team 35,Team 82
+Person 407,Team 48,Team 10,Team 25,Team 40
+Person 408,Team 80,Team 59,Team 52,Team 61,Team 46
+Person 409,Team 56,Team 20,Team 79,Team 94,Team 13
+Person 410,Team 15,Team 49,Team 90,Team 53
+Person 411,Team 82,Team 46,Team 37,Team 51,Team 50,Team 18,Team 79
+Person 412,Team 42,Team 55,Team 71,Team 69,Team 85,Team 92
+Person 413,Team 50,Team 13,Team 10,Team 95,Team 6,Team 21,Team 2
+Person 414,Team 65,Team 30,Team 74,Team 96,Team 70,Team 46
+Person 415,Team 93,Team 98,Team 59,Team 34,Team 39
+Person 416,Team 100,Team 3,Team 56,Team 25,Team 34
+Person 417,Team 3,Team 5,Team 100,Team 40,Team 33
+Person 418,Team 30,Team 96,Team 42,Team 81,Team 93,Team 86,Team 90
+Person 419,Team 21,Team 59,Team 85,Team 31,Team 64
+Person 420,Team 77,Team 41,Team 93,Team 53,Team 79
+Person 421,Team 50,Team 29,Team 36,Team 4,Team 98,Team 19,Team 58
+Person 422,Team 41,Team 35,Team 46,Team 85,Team 59,Team 28
+Person 423,Team 46,Team 14,Team 3,Team 20,Team 55,Team 25,Team 88,Team 97
+Person 424,Team 83,Team 17,Team 12,Team 29,Team 75,Team 39,Team 50
+Person 425,Team 74,Team 92,Team 20,Team 73,Team 57,Team 1,Team 15
+Person 426,Team 92,Team 3,Team 1,Team 39,Team 37,Team 66,Team 30
+Person 427,Team 7,Team 75,Team 88,Team 90,Team 68,Team 74,Team 11,Team 96
+Person 428,Team 75,Team 76,Team 29,Team 88,Team 43,Team 6,Team 32
+Person 429,Team 97,Team 68,Team 45,Team 40,Team 49,Team 74
+Person 430,Team 36,Team 61,Team 23,Team 9,Team 28,Team 11,Team 97,Team 25
+Person 431,Team 92,Team 24,Team 51,Team 50,Team 68,Team 38
+Person 432,Team 38,Team 77,Team 88,Team 36,Team 32,Team 35
+Person 433,Team 71,Team 99,Team 46,Team 50,Team 27
+Person 434,Team 62,Team 91,Team 53,Team 15,Team 18,Team 59
+Person 435,Team 35,Team 2,Team 19,Team 51,Team 57
+Person 436,Team 10,Team 9,Team 71,Team 84
+Person 437,Team 5,Team 64,Team 70,Team 33,Team 3
+Person 438,Team 6,Team 18,Team 97,Team 4,Team 98
+Person 439,Team 25,Team 91,Team 65,Team 35
+Person 440,Team 49,Team 15,Team 32,Team 96,Team 58
+Person 441,Team 100,Team 84,Team 56,Team 20,Team 94,Team 79
+Person 442,Team 13,Team 86,Team 60,Team 48
+Person 443,Team 92,Team 9,Team 30,Team 65
+Person 444,Team 78,Team 99,Team 79,Team 17,Team 91,Team 94
+Person 445,Team 87,Team 17,Team 43,Team 44,Team 25,Team 22,Team 61
+Person 446,Team 76,Team 62,Team 31,Team 92
+Person 447,Team 21,Team 7,Team 24,Team 96,Team 70,Team 19,Team 93,Team 18
+Person 448,Team 99,Team 17,Team 8,Team 83,Team 44,Team 11,Team 96,Team 90
+Person 449,Team 25,Team 37,Team 50,Team 30,Team 21,Team 67,Team 99,Team 33
+Person 450,Team 44,Team 53,Team 17,Team 85,Team 67,Team 37,Team 59
+Person 451,Team 92,Team 83,Team 64,Team 61,Team 23,Team 20,Team 94
+Person 452,Team 51,Team 48,Team 100,Team 77,Team 92,Team 34,Team 72,Team 15
+Person 453,Team 60,Team 2,Team 43,Team 74,Team 36,Team 14,Team 13,Team 71
+Person 454,Team 65,Team 71,Team 76,Team 84
+Person 455,Team 33,Team 93,Team 60,Team 76,Team 73,Team 78
+Person 456,Team 7,Team 68,Team 40,Team 34,Team 18,Team 95,Team 94,Team 14
+Person 457,Team 1,Team 51,Team 76,Team 82,Team 20,Team 43,Team 9
+Person 458,Team 73,Team 9,Team 76,Team 8,Team 62,Team 58,Team 41
+Person 459,Team 68,Team 71,Team 98,Team 63,Team 47,Team 95,Team 29
+Person 460,Team 12,Team 37,Team 6,Team 95
+Person 461,Team 62,Team 48,Team 11,Team 50,Team 64
+Person 462,Team 42,Team 87,Team 58,Team 63,Team 10,Team 7,Team 68
+Person 463,Team 57,Team 32,Team 40,Team 9,Team 62,Team 37,Team 91,Team 96
+Person 464,Team 63,Team 55,Team 92,Team 65,Team 53
+Person 465,Team 96,Team 30,Team 87,Team 43,Team 15
+Person 466,Team 91,Team 5,Team 66,Team 8
+Person 467,Team 4,Team 15,Team 54,Team 47,Team 90,Team 31,Team 51
+Person 468,Team 82,Team 26,Team 53,Team 46
+Person 469,Team 21,Team 20,Team 42,Team 1
+Person 470,Team 96,Team 5,Team 19,Team 37,Team 45,Team 48
+Person 471,Team 65,Team 86,Team 80,Team 34,Team 41
+Person 472,Team 97,Team 26,Team 42,Team 19,Team 13,Team 20
+Person 473,Team 44,Team 28,Team 22,Team 79,Team 60,Team 54,Team 52
+Person 474,Team 20,Team 32,Team 47,Team 89,Team 55,Team 17,Team 14,Team 96
+Person 475,Team 73,Team 41,Team 70,Team 91,Team 52,Team 61,Team 14,Team 94
+Person 476,Team 1,Team 52,Team 27,Team 41,Team 6,Team 80,Team 12
+Person 477,Team 64,Team 20,Team 34,Team 93
+Person 478,Team 73,Team 14,Team 29,Team 12,Team 69,Team 98
+Person 479,Team 85,Team 77,Team 3,Team 87,Team 9
+Person 480,Team 85,Team 40,Team 76,Team 90,Team 88,Team 28,Team 15
+Person 481,Team 21,Team 27,Team 92,Team 42,Team 82,Team 93,Team 75,Team 39
+Person 482,Team 6,Team 23,Team 16,Team 59,Team 63,Team 39
+Person 483,Team 100,Team 17,Team 96,Team 27
+Person 484,Team 14,Team 55,Team 30,Team 99,Team 58
+Person 485,Team 35,Team 72,Team 10,Team 23,Team 54
+Person 486,Team 73,Team 88,Team 50,Team 3,Team 67,Team 63,Team 78,Team 12
+Person 487,Team 85,Team 94,Team 12,Team 90,Team 11,Team 36,Team 17
+Person 488,Team 66,Team 25,Team 16,Team 4,Team 54,Team 40,Team 68
+Person 489,Team 13,Team 66,Team 10,Team 83,Team 19,Team 25
+Person 490,Team 68,Team 9,Team 6,Team 99
+Person 491,Team 93,Team 57,Team 70,Team 21,Team 76,Team 90
+Person 492,Team 14,Team 42,Team 47,Team 82,Team 50,Team 44
+Person 493,Team 47,Team 44,Team 62,Team 10,Team 66
+Person 494,Team 71,Team 26,Team 81,Team 43
+Person 495,Team 37,Team 16,Team 90,Team 69
+Person 496,Team 94,Team 86,Team 46,Team 49
+Person 497,Team 47,Team 32,Team 17,Team 22,Team 25,Team 23
+Person 498,Team 89,Team 75,Team 28,Team 33,Team 20,Team 43,Team 77,Team 85
+Person 499,Team 42,Team 81,Team 18,Team 36
+Person 500,Team 38,Team 64,Team 15,Team 82,Team 91

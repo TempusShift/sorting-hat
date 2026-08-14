@@ -1,0 +1,101 @@
+name,capacity,rank1,rank2,rank3,rank4,rank5,rank6,rank7,rank8,rank9,rank10,rank11,rank12,rank13,rank14,rank15
+Team 1,5,Person 370,Person 489,Person 88,Person 183,Person 325,Person 271,Person 51,Person 198,Person 441,Person 499,Person 211
+Team 2,5,Person 41,Person 230,Person 208,Person 475,Person 219,Person 147,Person 224,Person 288
+Team 3,7,Person 199,Person 291,Person 370,Person 130,Person 352,Person 183,Person 272,Person 222,Person 225,Person 112,Person 344,Person 278,Person 410,Person 208
+Team 4,6,Person 267,Person 76,Person 477,Person 426,Person 472,Person 37,Person 201,Person 26,Person 190,Person 436,Person 457,Person 153,Person 184,Person 346,Person 80
+Team 5,6,Person 348,Person 428,Person 432,Person 76,Person 346,Person 355,Person 49,Person 281,Person 172,Person 159,Person 206,Person 83,Person 21,Person 419,Person 431
+Team 6,6,Person 403,Person 456,Person 160,Person 366,Person 105,Person 395,Person 400,Person 300,Person 45,Person 404
+Team 7,5,Person 112,Person 319,Person 199,Person 33,Person 186,Person 190,Person 379,Person 373,Person 50,Person 268,Person 35
+Team 8,3,Person 379,Person 234,Person 21,Person 138,Person 370,Person 181,Person 285,Person 177,Person 349
+Team 9,3,Person 430,Person 489,Person 65,Person 239,Person 472,Person 383,Person 132,Person 210
+Team 10,4,Person 315,Person 456,Person 167,Person 262,Person 263,Person 500,Person 222,Person 80,Person 28
+Team 11,4,Person 336,Person 106,Person 196,Person 13,Person 89,Person 215,Person 121,Person 251,Person 53,Person 448
+Team 12,7,Person 235,Person 332,Person 1,Person 261,Person 209,Person 140,Person 453,Person 143,Person 498,Person 126,Person 159,Person 46,Person 231,Person 189
+Team 13,6,Person 67,Person 428,Person 185,Person 438,Person 384,Person 493,Person 205,Person 418,Person 17,Person 468,Person 224,Person 5,Person 189,Person 300
+Team 14,6,Person 433,Person 263,Person 257,Person 119,Person 265,Person 317,Person 70,Person 282,Person 28,Person 208,Person 466,Person 290,Person 277,Person 27,Person 355
+Team 15,4,Person 166,Person 260,Person 467,Person 96,Person 194,Person 270,Person 163,Person 130,Person 339,Person 200,Person 50,Person 341
+Team 16,4,Person 2,Person 89,Person 399,Person 121,Person 348,Person 378,Person 494,Person 496,Person 230,Person 353
+Team 17,3,Person 17,Person 363,Person 153,Person 145,Person 272,Person 39,Person 83,Person 384,Person 262,Person 315,Person 352,Person 219,Person 261,Person 298,Person 90
+Team 18,7,Person 146,Person 205,Person 5,Person 41,Person 232,Person 239,Person 428,Person 250,Person 324,Person 130,Person 18,Person 265,Person 158
+Team 19,7,Person 18,Person 17,Person 13,Person 276,Person 10,Person 434,Person 40,Person 196,Person 74,Person 357
+Team 20,7,Person 85,Person 328,Person 496,Person 390,Person 157,Person 433,Person 207,Person 231,Person 176,Person 445,Person 368,Person 13,Person 259,Person 269
+Team 21,5,Person 472,Person 157,Person 18,Person 81,Person 256,Person 363,Person 215,Person 466,Person 488,Person 280,Person 415,Person 164,Person 283,Person 366,Person 438
+Team 22,4,Person 396,Person 465,Person 230,Person 61,Person 495,Person 386,Person 37,Person 119,Person 345,Person 168,Person 428,Person 169,Person 456,Person 472,Person 106
+Team 23,7,Person 64,Person 32,Person 69,Person 74,Person 106,Person 462,Person 200,Person 300,Person 413,Person 417,Person 62,Person 416
+Team 24,3,Person 122,Person 353,Person 474,Person 489,Person 22,Person 491,Person 74,Person 49,Person 269
+Team 25,6,Person 97,Person 214,Person 159,Person 250,Person 276,Person 144,Person 353,Person 338,Person 398,Person 155,Person 494,Person 378,Person 99
+Team 26,7,Person 495,Person 25,Person 366,Person 433,Person 368,Person 355,Person 408,Person 138,Person 480,Person 485,Person 295,Person 26
+Team 27,7,Person 433,Person 159,Person 134,Person 83,Person 140,Person 331,Person 400,Person 346,Person 443,Person 488,Person 319,Person 423,Person 126,Person 372
+Team 28,3,Person 87,Person 6,Person 176,Person 481,Person 454,Person 191,Person 219,Person 29,Person 469,Person 205,Person 388,Person 208,Person 70,Person 132
+Team 29,4,Person 458,Person 177,Person 140,Person 362,Person 437,Person 440,Person 21,Person 435,Person 454,Person 12,Person 295,Person 266
+Team 30,6,Person 272,Person 94,Person 489,Person 438,Person 77,Person 349,Person 365,Person 358,Person 157,Person 112,Person 479
+Team 31,3,Person 43,Person 125,Person 1,Person 500,Person 198,Person 446,Person 337,Person 385,Person 362,Person 421,Person 463,Person 62,Person 323,Person 28
+Team 32,4,Person 136,Person 55,Person 217,Person 250,Person 103,Person 20,Person 286,Person 170,Person 111,Person 447
+Team 33,5,Person 221,Person 462,Person 337,Person 356,Person 423,Person 38,Person 152,Person 125,Person 124,Person 271,Person 343,Person 76
+Team 34,6,Person 154,Person 423,Person 275,Person 394,Person 351,Person 46,Person 135,Person 358,Person 140,Person 331
+Team 35,4,Person 234,Person 76,Person 425,Person 110,Person 409,Person 377,Person 205,Person 14,Person 28,Person 223
+Team 36,5,Person 301,Person 360,Person 131,Person 352,Person 353,Person 22,Person 387,Person 38,Person 88
+Team 37,3,Person 391,Person 380,Person 293,Person 130,Person 273,Person 73,Person 87,Person 370,Person 438,Person 369,Person 10,Person 446,Person 104,Person 350
+Team 38,5,Person 91,Person 346,Person 441,Person 436,Person 357,Person 330,Person 396,Person 162,Person 421,Person 390,Person 281,Person 261,Person 362
+Team 39,5,Person 430,Person 196,Person 132,Person 22,Person 461,Person 494,Person 493,Person 6,Person 140,Person 108,Person 378,Person 198,Person 217
+Team 40,6,Person 107,Person 39,Person 456,Person 366,Person 499,Person 457,Person 297,Person 108,Person 300,Person 226,Person 347,Person 105
+Team 41,6,Person 116,Person 95,Person 28,Person 300,Person 82,Person 69,Person 193,Person 75,Person 220,Person 40,Person 347,Person 323,Person 247,Person 342,Person 272
+Team 42,7,Person 153,Person 399,Person 256,Person 274,Person 206,Person 245,Person 218,Person 359,Person 178,Person 305
+Team 43,7,Person 316,Person 193,Person 346,Person 379,Person 312,Person 222,Person 335,Person 200,Person 113,Person 41
+Team 44,4,Person 170,Person 21,Person 320,Person 423,Person 60,Person 252,Person 316,Person 303,Person 74,Person 210,Person 240,Person 156,Person 137,Person 373
+Team 45,7,Person 483,Person 63,Person 362,Person 269,Person 52,Person 345,Person 158,Person 235,Person 315
+Team 46,5,Person 172,Person 355,Person 239,Person 375,Person 235,Person 328,Person 264,Person 289,Person 301,Person 377,Person 162,Person 403,Person 136
+Team 47,7,Person 161,Person 405,Person 65,Person 295,Person 177,Person 357,Person 258,Person 47,Person 322,Person 204,Person 378,Person 196,Person 127,Person 238
+Team 48,3,Person 486,Person 232,Person 413,Person 350,Person 344,Person 440,Person 15,Person 229,Person 86,Person 97,Person 185,Person 38,Person 499,Person 146,Person 40
+Team 49,7,Person 356,Person 142,Person 272,Person 306,Person 394,Person 177,Person 342,Person 90
+Team 50,4,Person 33,Person 110,Person 91,Person 466,Person 135,Person 11,Person 73,Person 334,Person 138,Person 475,Person 338,Person 324,Person 342,Person 102
+Team 51,3,Person 378,Person 264,Person 9,Person 121,Person 75,Person 114,Person 249,Person 226,Person 251,Person 210,Person 445,Person 427,Person 491,Person 394,Person 21
+Team 52,5,Person 275,Person 21,Person 270,Person 198,Person 26,Person 425,Person 1,Person 105
+Team 53,3,Person 313,Person 112,Person 406,Person 77,Person 163,Person 474,Person 64,Person 278,Person 460,Person 147,Person 126
+Team 54,3,Person 60,Person 447,Person 106,Person 90,Person 23,Person 15,Person 197,Person 335,Person 186,Person 179,Person 139,Person 383,Person 7
+Team 55,7,Person 142,Person 189,Person 119,Person 495,Person 401,Person 173,Person 246,Person 253,Person 348,Person 268
+Team 56,4,Person 35,Person 34,Person 264,Person 332,Person 119,Person 348,Person 366,Person 59,Person 340
+Team 57,4,Person 342,Person 267,Person 301,Person 73,Person 201,Person 388,Person 373,Person 443,Person 257,Person 493,Person 308,Person 362,Person 437,Person 484
+Team 58,6,Person 454,Person 278,Person 148,Person 297,Person 169,Person 205,Person 174,Person 26,Person 152,Person 63
+Team 59,6,Person 394,Person 312,Person 176,Person 156,Person 247,Person 395,Person 47,Person 278,Person 498,Person 239,Person 467,Person 22,Person 256,Person 249
+Team 60,5,Person 459,Person 430,Person 232,Person 244,Person 4,Person 493,Person 107,Person 450,Person 167
+Team 61,7,Person 172,Person 138,Person 239,Person 214,Person 226,Person 286,Person 5,Person 363,Person 24,Person 403,Person 497,Person 340,Person 119,Person 307,Person 496
+Team 62,6,Person 451,Person 11,Person 468,Person 108,Person 96,Person 128,Person 88,Person 232,Person 47,Person 339,Person 190,Person 62,Person 143
+Team 63,6,Person 115,Person 118,Person 101,Person 254,Person 34,Person 334,Person 393,Person 36,Person 6,Person 381,Person 172,Person 300,Person 44,Person 337
+Team 64,3,Person 233,Person 485,Person 244,Person 173,Person 178,Person 153,Person 135,Person 46,Person 301,Person 47,Person 464,Person 146,Person 12
+Team 65,4,Person 96,Person 460,Person 239,Person 433,Person 146,Person 449,Person 352,Person 261,Person 222,Person 444,Person 53,Person 221,Person 100
+Team 66,3,Person 68,Person 323,Person 464,Person 18,Person 8,Person 451,Person 114,Person 237,Person 127,Person 343,Person 81,Person 176,Person 384
+Team 67,7,Person 204,Person 168,Person 6,Person 126,Person 381,Person 313,Person 196,Person 81
+Team 68,7,Person 346,Person 238,Person 446,Person 303,Person 212,Person 442,Person 56,Person 350,Person 136,Person 267,Person 274,Person 88,Person 456
+Team 69,4,Person 467,Person 494,Person 172,Person 423,Person 17,Person 370,Person 105,Person 219,Person 111,Person 192,Person 118,Person 258,Person 108,Person 101
+Team 70,7,Person 416,Person 364,Person 424,Person 328,Person 194,Person 92,Person 152,Person 232,Person 141,Person 63,Person 396,Person 307,Person 433
+Team 71,4,Person 421,Person 247,Person 475,Person 358,Person 191,Person 205,Person 30,Person 458
+Team 72,5,Person 430,Person 265,Person 160,Person 242,Person 313,Person 12,Person 478,Person 328,Person 370
+Team 73,3,Person 491,Person 426,Person 46,Person 398,Person 200,Person 94,Person 319,Person 492
+Team 74,3,Person 173,Person 296,Person 469,Person 443,Person 297,Person 134,Person 314,Person 150
+Team 75,3,Person 65,Person 393,Person 478,Person 273,Person 324,Person 371,Person 314,Person 316,Person 69,Person 89,Person 473,Person 193,Person 354,Person 58,Person 441
+Team 76,4,Person 300,Person 155,Person 261,Person 290,Person 82,Person 485,Person 270,Person 128
+Team 77,5,Person 66,Person 237,Person 487,Person 47,Person 142,Person 204,Person 161,Person 247,Person 289,Person 198,Person 18,Person 19,Person 238,Person 332,Person 391
+Team 78,7,Person 154,Person 35,Person 346,Person 365,Person 322,Person 73,Person 108,Person 276,Person 58,Person 90,Person 187,Person 343,Person 481,Person 285,Person 210
+Team 79,5,Person 93,Person 303,Person 167,Person 153,Person 496,Person 1,Person 294,Person 82,Person 279,Person 478
+Team 80,4,Person 219,Person 421,Person 150,Person 189,Person 481,Person 88,Person 120,Person 309,Person 449,Person 167,Person 249,Person 197,Person 6
+Team 81,4,Person 451,Person 59,Person 316,Person 67,Person 337,Person 4,Person 404,Person 483,Person 307,Person 98,Person 80,Person 5
+Team 82,6,Person 202,Person 27,Person 181,Person 423,Person 8,Person 352,Person 488,Person 77,Person 235,Person 201,Person 141,Person 256,Person 71
+Team 83,5,Person 219,Person 295,Person 222,Person 263,Person 70,Person 248,Person 62,Person 246,Person 294,Person 143,Person 234,Person 490
+Team 84,3,Person 137,Person 296,Person 318,Person 216,Person 461,Person 314,Person 233,Person 6,Person 382,Person 472,Person 478,Person 171,Person 164
+Team 85,6,Person 16,Person 314,Person 35,Person 205,Person 318,Person 125,Person 253,Person 127,Person 144,Person 167,Person 451
+Team 86,5,Person 196,Person 88,Person 52,Person 494,Person 374,Person 416,Person 252,Person 412
+Team 87,7,Person 250,Person 228,Person 248,Person 135,Person 492,Person 200,Person 465,Person 89,Person 301,Person 288,Person 325,Person 25,Person 368
+Team 88,3,Person 425,Person 287,Person 215,Person 488,Person 31,Person 279,Person 302,Person 278,Person 377
+Team 89,6,Person 444,Person 132,Person 302,Person 47,Person 90,Person 194,Person 100,Person 490,Person 183,Person 44,Person 453
+Team 90,5,Person 147,Person 380,Person 386,Person 312,Person 393,Person 22,Person 468,Person 93,Person 373,Person 262
+Team 91,6,Person 74,Person 359,Person 217,Person 7,Person 225,Person 374,Person 365,Person 265,Person 11,Person 440
+Team 92,6,Person 263,Person 398,Person 479,Person 241,Person 195,Person 449,Person 328,Person 436,Person 50
+Team 93,5,Person 179,Person 219,Person 493,Person 257,Person 106,Person 249,Person 390,Person 292,Person 394,Person 205,Person 168,Person 371,Person 185
+Team 94,5,Person 448,Person 260,Person 441,Person 278,Person 384,Person 133,Person 37,Person 355,Person 223,Person 229,Person 200,Person 18,Person 372
+Team 95,4,Person 210,Person 296,Person 229,Person 297,Person 399,Person 335,Person 45,Person 241,Person 326,Person 163,Person 3,Person 215,Person 197,Person 262
+Team 96,3,Person 172,Person 65,Person 450,Person 88,Person 1,Person 307,Person 82,Person 475,Person 484,Person 109
+Team 97,4,Person 43,Person 343,Person 301,Person 93,Person 71,Person 173,Person 423,Person 346,Person 69,Person 209,Person 75,Person 329,Person 341,Person 416
+Team 98,5,Person 371,Person 129,Person 344,Person 215,Person 177,Person 431,Person 160,Person 106,Person 222,Person 384,Person 481
+Team 99,4,Person 103,Person 334,Person 138,Person 367,Person 218,Person 266,Person 76,Person 355,Person 433,Person 368,Person 457,Person 261,Person 473
+Team 100,7,Person 140,Person 468,Person 311,Person 316,Person 357,Person 260,Person 200,Person 239,Person 440

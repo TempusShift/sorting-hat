@@ -1,9 +1,21 @@
 "use client";
 
 import { BarChart } from "@mantine/charts";
-import { Alert, Card, Group, List, Progress, SimpleGrid, Stack, Text, Title } from "@mantine/core";
+import {
+  Alert,
+  Card,
+  Group,
+  List,
+  Progress,
+  SimpleGrid,
+  Stack,
+  Table,
+  Tabs,
+  Text,
+  Title,
+} from "@mantine/core";
 import { IconAlertTriangle } from "@tabler/icons-react";
-import { computeGroupFillRates, getAchievedRank } from "@/lib/algorithm";
+import { computeGroupFillRates, getAchievedRank, getGroupAchievedRank } from "@/lib/algorithm";
 import type { Assignment, Group as GroupEntity, Person } from "@/lib/types";
 
 interface StatsPanelProps {
@@ -69,35 +81,60 @@ export function StatsPanel({
   const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
   const personNameById = new Map(people.map((p) => [p.id, p.name]));
 
+  const groupRanks: number[] = [];
+  let groupUnrankedMatchCount = 0;
+  const perGroupStats = groups.map((g) => {
+    const memberIds = assignments.filter((a) => a.groupId === g.id).map((a) => a.personId);
+    const ranks: number[] = [];
+    let unranked = 0;
+    for (const personId of memberIds) {
+      const rank = getGroupAchievedRank(g, personId);
+      if (rank === null) {
+        unranked++;
+        groupUnrankedMatchCount++;
+      } else {
+        ranks.push(rank);
+        groupRanks.push(rank);
+      }
+    }
+    const groupMean = ranks.length > 0 ? ranks.reduce((a, b) => a + b, 0) / ranks.length : null;
+    return {
+      groupId: g.id,
+      name: g.name,
+      assigned: memberIds.length,
+      capacity: g.capacity,
+      mean: groupMean,
+      unranked,
+    };
+  });
+
+  const groupMean =
+    groupRanks.length > 0 ? groupRanks.reduce((a, b) => a + b, 0) / groupRanks.length : null;
+  const sortedGroupRanks = [...groupRanks].sort((a, b) => a - b);
+  const groupMedian =
+    sortedGroupRanks.length === 0
+      ? null
+      : sortedGroupRanks.length % 2 === 1
+        ? sortedGroupRanks[(sortedGroupRanks.length - 1) / 2]
+        : (sortedGroupRanks[sortedGroupRanks.length / 2 - 1] +
+            sortedGroupRanks[sortedGroupRanks.length / 2]) /
+          2;
+
+  const groupDistributionMap = new Map<number, number>();
+  for (const r of groupRanks) groupDistributionMap.set(r, (groupDistributionMap.get(r) ?? 0) + 1);
+  const maxGroupRank = groupRanks.length > 0 ? Math.max(...groupRanks) : 0;
+  const groupDistributionData = Array.from({ length: maxGroupRank }, (_, i) => ({
+    rank: `#${i + 1}`,
+    count: groupDistributionMap.get(i + 1) ?? 0,
+  }));
+  if (groupUnrankedMatchCount > 0) {
+    groupDistributionData.push({ rank: "Unranked match", count: groupUnrankedMatchCount });
+  }
+
+  const emptySeats = fillRates.reduce((sum, f) => sum + Math.max(0, f.capacity - f.assigned), 0);
+
   return (
     <Stack>
-      <SimpleGrid cols={{ base: 1, sm: 3 }}>
-        <Card withBorder padding="md">
-          <Text size="sm" c="dimmed">
-            Mean rank achieved
-          </Text>
-          <Text size="xl" fw={700}>
-            {mean !== null ? mean.toFixed(2) : "—"}
-          </Text>
-        </Card>
-        <Card withBorder padding="md">
-          <Text size="sm" c="dimmed">
-            Median rank achieved
-          </Text>
-          <Text size="xl" fw={700}>
-            {median !== null ? median : "—"}
-          </Text>
-        </Card>
-        <Card withBorder padding="md">
-          <Text size="sm" c="dimmed">
-            Unmatched
-          </Text>
-          <Text size="xl" fw={700}>
-            {unmatchedCount}
-          </Text>
-        </Card>
-      </SimpleGrid>
-
       {(bumpedPersonIds.length > 0 || shiftedPersonIds.length > 0 || backfilledPersonIds.length > 0) && (
         <Alert color="yellow" icon={<IconAlertTriangle size={16} />} title="Affected by contention">
           <Stack gap="xs">
@@ -152,38 +189,158 @@ export function StatsPanel({
         </Alert>
       )}
 
-      {distributionData.length > 0 && (
-        <Card withBorder padding="md">
-          <Title order={4} mb="md">
-            Happiness score distribution
-          </Title>
-          <BarChart
-            h={260}
-            data={distributionData}
-            dataKey="rank"
-            series={[{ name: "count", color: "violet.6" }]}
-          />
-        </Card>
-      )}
+      <Tabs defaultValue="person">
+        <Tabs.List mb="md">
+          <Tabs.Tab value="person">By person</Tabs.Tab>
+          <Tabs.Tab value="group">By group</Tabs.Tab>
+        </Tabs.List>
 
-      <Card withBorder padding="md">
-        <Title order={4} mb="md">
-          Group fill rates
-        </Title>
-        <Stack gap="sm">
-          {fillRates.map((f) => (
-            <Stack key={f.groupId} gap={4}>
-              <Group justify="space-between">
-                <Text size="sm">{groupNameById.get(f.groupId)}</Text>
+        <Tabs.Panel value="person">
+          <Stack>
+            <SimpleGrid cols={{ base: 1, sm: 3 }}>
+              <Card withBorder padding="md">
                 <Text size="sm" c="dimmed">
-                  {f.assigned} / {f.capacity}
+                  Mean rank achieved
                 </Text>
-              </Group>
-              <Progress value={f.capacity > 0 ? (f.assigned / f.capacity) * 100 : 0} />
-            </Stack>
-          ))}
-        </Stack>
-      </Card>
+                <Text size="xl" fw={700}>
+                  {mean !== null ? mean.toFixed(2) : "—"}
+                </Text>
+              </Card>
+              <Card withBorder padding="md">
+                <Text size="sm" c="dimmed">
+                  Median rank achieved
+                </Text>
+                <Text size="xl" fw={700}>
+                  {median !== null ? median : "—"}
+                </Text>
+              </Card>
+              <Card withBorder padding="md">
+                <Text size="sm" c="dimmed">
+                  Unmatched
+                </Text>
+                <Text size="xl" fw={700}>
+                  {unmatchedCount}
+                </Text>
+              </Card>
+            </SimpleGrid>
+
+            {distributionData.length > 0 && (
+              <Card withBorder padding="md">
+                <Title order={4} mb="md">
+                  Happiness score distribution
+                </Title>
+                <Text size="xs" c="dimmed" mb="md">
+                  How well people did against their own preference lists.
+                </Text>
+                <BarChart
+                  h={260}
+                  data={distributionData}
+                  dataKey="rank"
+                  series={[{ name: "count", color: "violet.6" }]}
+                />
+              </Card>
+            )}
+          </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="group">
+          <Stack>
+            <SimpleGrid cols={{ base: 1, sm: 3 }}>
+              <Card withBorder padding="md">
+                <Text size="sm" c="dimmed">
+                  Mean rank achieved
+                </Text>
+                <Text size="xl" fw={700}>
+                  {groupMean !== null ? groupMean.toFixed(2) : "—"}
+                </Text>
+              </Card>
+              <Card withBorder padding="md">
+                <Text size="sm" c="dimmed">
+                  Median rank achieved
+                </Text>
+                <Text size="xl" fw={700}>
+                  {groupMedian !== null ? groupMedian : "—"}
+                </Text>
+              </Card>
+              <Card withBorder padding="md">
+                <Text size="sm" c="dimmed">
+                  Empty seats
+                </Text>
+                <Text size="xl" fw={700}>
+                  {emptySeats}
+                </Text>
+              </Card>
+            </SimpleGrid>
+
+            {groupDistributionData.length > 0 && (
+              <Card withBorder padding="md">
+                <Title order={4} mb="md">
+                  Happiness score distribution
+                </Title>
+                <Text size="xs" c="dimmed" mb="md">
+                  How well groups did against their own preference lists for the people they were
+                  assigned.
+                </Text>
+                <BarChart
+                  h={260}
+                  data={groupDistributionData}
+                  dataKey="rank"
+                  series={[{ name: "count", color: "teal.6" }]}
+                />
+              </Card>
+            )}
+
+            <Card withBorder padding="md">
+              <Title order={4} mb="md">
+                Group fill rates
+              </Title>
+              <Stack gap="sm">
+                {fillRates.map((f) => (
+                  <Stack key={f.groupId} gap={4}>
+                    <Group justify="space-between">
+                      <Text size="sm">{groupNameById.get(f.groupId)}</Text>
+                      <Text size="sm" c="dimmed">
+                        {f.assigned} / {f.capacity}
+                      </Text>
+                    </Group>
+                    <Progress value={f.capacity > 0 ? (f.assigned / f.capacity) * 100 : 0} />
+                  </Stack>
+                ))}
+              </Stack>
+            </Card>
+
+            <Card withBorder padding="md">
+              <Title order={4} mb="md">
+                By group breakdown
+              </Title>
+              <Table.ScrollContainer minWidth={400}>
+                <Table striped highlightOnHover withTableBorder>
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th>Group</Table.Th>
+                      <Table.Th>Assigned</Table.Th>
+                      <Table.Th>Mean rank achieved</Table.Th>
+                      <Table.Th>Unranked matches</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {perGroupStats.map((g) => (
+                      <Table.Tr key={g.groupId}>
+                        <Table.Td>{g.name}</Table.Td>
+                        <Table.Td>
+                          {g.assigned} / {g.capacity}
+                        </Table.Td>
+                        <Table.Td>{g.mean !== null ? g.mean.toFixed(2) : "—"}</Table.Td>
+                        <Table.Td>{g.unranked}</Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </Table.ScrollContainer>
+            </Card>
+          </Stack>
+        </Tabs.Panel>
+      </Tabs>
     </Stack>
   );
 }
