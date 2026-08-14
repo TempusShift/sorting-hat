@@ -10,6 +10,7 @@ interface AssignmentsTableProps {
   assignments: Assignment[];
   bumpedPersonIds?: string[];
   backfilledPersonIds?: string[];
+  forcedPersonIds?: string[];
 }
 
 export function AssignmentsTable({
@@ -18,12 +19,14 @@ export function AssignmentsTable({
   assignments,
   bumpedPersonIds = [],
   backfilledPersonIds = [],
+  forcedPersonIds = [],
 }: AssignmentsTableProps) {
   const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
   const groupById = new Map(groups.map((g) => [g.id, g]));
   const assignmentByPerson = new Map(assignments.map((a) => [a.personId, a]));
   const bumpedSet = new Set(bumpedPersonIds);
   const backfilledSet = new Set(backfilledPersonIds);
+  const forcedSet = new Set(forcedPersonIds);
 
   const rows = [...people].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -69,6 +72,11 @@ export function AssignmentsTable({
                     {backfilledSet.has(person.id) && (
                       <Badge variant="light" color="blue">
                         Backfilled
+                      </Badge>
+                    )}
+                    {forcedSet.has(person.id) && (
+                      <Badge variant="light" color="grape">
+                        Forced
                       </Badge>
                     )}
                   </Group>

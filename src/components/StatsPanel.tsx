@@ -25,6 +25,7 @@ interface StatsPanelProps {
   bumpedPersonIds?: string[];
   shiftedPersonIds?: string[];
   backfilledPersonIds?: string[];
+  forcedPersonIds?: string[];
 }
 
 export function StatsPanel({
@@ -34,6 +35,7 @@ export function StatsPanel({
   bumpedPersonIds = [],
   shiftedPersonIds = [],
   backfilledPersonIds = [],
+  forcedPersonIds = [],
 }: StatsPanelProps) {
   const assignmentByPerson = new Map(assignments.map((a) => [a.personId, a]));
   const ranks: number[] = [];
@@ -135,7 +137,10 @@ export function StatsPanel({
 
   return (
     <Stack>
-      {(bumpedPersonIds.length > 0 || shiftedPersonIds.length > 0 || backfilledPersonIds.length > 0) && (
+      {(bumpedPersonIds.length > 0 ||
+        shiftedPersonIds.length > 0 ||
+        backfilledPersonIds.length > 0 ||
+        forcedPersonIds.length > 0) && (
         <Alert color="yellow" icon={<IconAlertTriangle size={16} />} title="Affected by contention">
           <Stack gap="xs">
             {bumpedPersonIds.length > 0 && (
@@ -180,6 +185,22 @@ export function StatsPanel({
                 </Text>
                 <List size="sm">
                   {backfilledPersonIds.map((id) => (
+                    <List.Item key={id}>{personNameById.get(id) ?? id}</List.Item>
+                  ))}
+                </List>
+              </div>
+            )}
+            {forcedPersonIds.length > 0 && (
+              <div>
+                <Text size="sm" fw={500}>
+                  Forced into an unranked group ({forcedPersonIds.length})
+                </Text>
+                <Text size="xs" c="dimmed" mb={4}>
+                  Left unmatched with no eligible group left; seated to fill an open seat despite
+                  neither side ranking the other.
+                </Text>
+                <List size="sm">
+                  {forcedPersonIds.map((id) => (
                     <List.Item key={id}>{personNameById.get(id) ?? id}</List.Item>
                   ))}
                 </List>

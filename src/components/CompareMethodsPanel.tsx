@@ -9,11 +9,28 @@ interface CompareMethodsPanelProps {
   groups: Group[];
   fillUnmatched?: boolean;
   optimalPriority?: OptimalPriority;
+  mutualOnly?: boolean;
+  fillGroups?: boolean;
 }
 
-export function CompareMethodsPanel({ people, groups, fillUnmatched, optimalPriority }: CompareMethodsPanelProps) {
-  const stable = runGaleShapley(people, groups, { fillUnmatched: fillUnmatched ?? false });
-  const optimal = runOptimalAssignment(people, groups, { priority: optimalPriority ?? "people" });
+export function CompareMethodsPanel({
+  people,
+  groups,
+  fillUnmatched,
+  optimalPriority,
+  mutualOnly,
+  fillGroups,
+}: CompareMethodsPanelProps) {
+  const stable = runGaleShapley(people, groups, {
+    fillUnmatched: fillUnmatched ?? false,
+    mutualOnly: mutualOnly ?? false,
+    fillGroups: fillGroups ?? false,
+  });
+  const optimal = runOptimalAssignment(people, groups, {
+    priority: optimalPriority ?? "people",
+    mutualOnly: mutualOnly ?? false,
+    fillGroups: fillGroups ?? false,
+  });
   const stableGroupById = new Map(stable.assignments.map((a) => [a.personId, a.groupId]));
   const optimalGroupById = new Map(optimal.assignments.map((a) => [a.personId, a.groupId]));
   const groupNameById = new Map(groups.map((g) => [g.id, g.name]));

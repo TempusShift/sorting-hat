@@ -15,6 +15,8 @@ interface SessionStore {
   setFillUnmatched: (id: string, fillUnmatched: boolean) => void;
   setMatchingMethod: (id: string, matchingMethod: MatchingMethod) => void;
   setOptimalPriority: (id: string, optimalPriority: OptimalPriority) => void;
+  setMutualOnly: (id: string, mutualOnly: boolean) => void;
+  setFillGroups: (id: string, fillGroups: boolean) => void;
   runMatching: (id: string) => void;
   deleteSession: (id: string) => void;
 }
@@ -45,6 +47,8 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       fillUnmatched: false,
       matchingMethod: "stable",
       optimalPriority: "people",
+      mutualOnly: false,
+      fillGroups: false,
     };
     storage.saveSession(session);
     set({ sessions: [session, ...get().sessions] });
@@ -93,13 +97,39 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
     set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
   },
 
+  setMutualOnly: (id, mutualOnly) => {
+    const session = get().getSession(id);
+    if (!session) return;
+    const updated = touch({ ...session, mutualOnly });
+    storage.saveSession(updated);
+    set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
+  },
+
+  setFillGroups: (id, fillGroups) => {
+    const session = get().getSession(id);
+    if (!session) return;
+    const updated = touch({ ...session, fillGroups });
+    storage.saveSession(updated);
+    set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
+  },
+
   runMatching: (id) => {
     const session = get().getSession(id);
     if (!session) return;
+    const mutualOnly = session.mutualOnly ?? false;
+    const fillGroups = session.fillGroups ?? false;
     const result =
       session.matchingMethod === "optimal"
-        ? runOptimalAssignment(session.people, session.groups, { priority: session.optimalPriority ?? "people" })
-        : runGaleShapley(session.people, session.groups, { fillUnmatched: session.fillUnmatched ?? false });
+        ? runOptimalAssignment(session.people, session.groups, {
+            priority: session.optimalPriority ?? "people",
+            mutualOnly,
+            fillGroups,
+          })
+        : runGaleShapley(session.people, session.groups, {
+            fillUnmatched: session.fillUnmatched ?? false,
+            mutualOnly,
+            fillGroups,
+          });
     const updated = touch({ ...session, result });
     storage.saveSession(updated);
     set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });

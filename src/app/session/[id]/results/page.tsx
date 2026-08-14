@@ -47,6 +47,8 @@ export default function ResultsPage() {
   const setFillUnmatched = useSessionStore((s) => s.setFillUnmatched);
   const setMatchingMethod = useSessionStore((s) => s.setMatchingMethod);
   const setOptimalPriority = useSessionStore((s) => s.setOptimalPriority);
+  const setMutualOnly = useSessionStore((s) => s.setMutualOnly);
+  const setFillGroups = useSessionStore((s) => s.setFillGroups);
 
   useEffect(() => {
     hydrate();
@@ -168,6 +170,26 @@ export default function ResultsPage() {
             />
           </Box>
         )}
+        <Switch
+          mt="sm"
+          label="Only pair if both sides ranked each other"
+          description="A person and group can only be matched if each one listed the other (sides that gave no preferences at all are indifferent and still match anyone)"
+          checked={session.mutualOnly ?? false}
+          onChange={(e) => {
+            setMutualOnly(sessionId, e.currentTarget.checked);
+            runMatching(sessionId);
+          }}
+        />
+        <Switch
+          mt="sm"
+          label="Make sure every group fills its spots"
+          description="Force-fill any seats still open after matching with remaining unmatched people, even if neither side ranked the other"
+          checked={session.fillGroups ?? false}
+          onChange={(e) => {
+            setFillGroups(sessionId, e.currentTarget.checked);
+            runMatching(sessionId);
+          }}
+        />
       </Box>
 
       <Tabs defaultValue="assignments">
@@ -199,6 +221,7 @@ export default function ResultsPage() {
             assignments={result.assignments}
             bumpedPersonIds={result.bumpedPersonIds}
             backfilledPersonIds={result.backfilledPersonIds}
+            forcedPersonIds={result.forcedPersonIds}
           />
         </Tabs.Panel>
 
@@ -209,6 +232,7 @@ export default function ResultsPage() {
             assignments={result.assignments}
             bumpedPersonIds={result.bumpedPersonIds}
             backfilledPersonIds={result.backfilledPersonIds}
+            forcedPersonIds={result.forcedPersonIds}
           />
         </Tabs.Panel>
 
@@ -224,6 +248,8 @@ export default function ResultsPage() {
             fillUnmatched={session.fillUnmatched}
             matchingMethod={session.matchingMethod}
             optimalPriority={session.optimalPriority}
+            mutualOnly={session.mutualOnly}
+            fillGroups={session.fillGroups}
           />
         </Tabs.Panel>
 
@@ -233,6 +259,8 @@ export default function ResultsPage() {
             groups={groups}
             fillUnmatched={session.fillUnmatched}
             optimalPriority={session.optimalPriority}
+            mutualOnly={session.mutualOnly}
+            fillGroups={session.fillGroups}
           />
         </Tabs.Panel>
 

@@ -194,6 +194,68 @@ describe("runGaleShapley", () => {
       expect(new Set(result.shiftedPersonIds)).toEqual(new Set(["bob", "alice"]));
     });
   });
+
+  describe("mutualOnly", () => {
+    it("blocks a pairing when the group has preferences but didn't rank the person", () => {
+      // eng has open capacity and would normally accept alice FIFO, but eng stated
+      // preferences that don't include her.
+      const people = [person("alice", ["eng"])];
+      const groups = [group("eng", 1, ["bob"])];
+      const result = runGaleShapley(people, groups, { mutualOnly: true });
+      expect(result.assignments).toEqual([{ personId: "alice", groupId: null }]);
+    });
+
+    it("allows a pairing when the group has no stated preferences (indifferent)", () => {
+      const people = [person("alice", ["eng"])];
+      const groups = [group("eng", 1)];
+      const result = runGaleShapley(people, groups, { mutualOnly: true });
+      expect(result.assignments).toEqual([{ personId: "alice", groupId: "eng" }]);
+    });
+
+    it("allows a pairing when both sides ranked each other", () => {
+      const people = [person("alice", ["eng"])];
+      const groups = [group("eng", 1, ["alice"])];
+      const result = runGaleShapley(people, groups, { mutualOnly: true });
+      expect(result.assignments).toEqual([{ personId: "alice", groupId: "eng" }]);
+    });
+  });
+
+  describe("fillGroups", () => {
+    it("leaves a seat empty when there's nobody left to fill it", () => {
+      const people = [person("alice", ["design"])];
+      const groups = [group("eng", 1), group("design", 1)];
+      const result = runGaleShapley(people, groups, { fillGroups: true });
+      const byId = new Map(result.assignments.map((a) => [a.personId, a.groupId]));
+      expect(byId.get("alice")).toBe("design");
+      expect(result.forcedPersonIds).toEqual([]);
+    });
+
+    it("seats an unmatched person into a group neither side ranked", () => {
+      const people = [person("alice", ["eng"]), person("bob", ["eng"])];
+      const groups = [group("eng", 1), group("design", 1)];
+      const result = runGaleShapley(people, groups, { fillGroups: true });
+      const byId = new Map(result.assignments.map((a) => [a.personId, a.groupId]));
+      expect([byId.get("alice"), byId.get("bob")].sort()).toEqual(["design", "eng"]);
+      expect(result.forcedPersonIds).toHaveLength(1);
+    });
+
+    it("respects mutualOnly when force-filling", () => {
+      const people = [person("alice", ["eng"]), person("bob", ["eng"])];
+      const groups = [group("eng", 1), group("design", 1, ["carol"])];
+      const result = runGaleShapley(people, groups, { fillGroups: true, mutualOnly: true });
+      const unmatched = result.assignments.filter((a) => a.groupId === null);
+      expect(unmatched).toHaveLength(1);
+      expect(result.forcedPersonIds).toEqual([]);
+    });
+
+    it("never exceeds a group's capacity", () => {
+      const people = [person("alice", []), person("bob", []), person("carol", [])];
+      const groups = [group("eng", 1)];
+      const result = runGaleShapley(people, groups, { fillGroups: true });
+      const seated = result.assignments.filter((a) => a.groupId === "eng");
+      expect(seated).toHaveLength(1);
+    });
+  });
 });
 
 describe("runOptimalAssignment", () => {
@@ -283,6 +345,42 @@ describe("runOptimalAssignment", () => {
       expect(a.groupId === null || p.rankings.includes(a.groupId)).toBe(true);
     }
     expect(result.assignments.filter((a) => a.groupId !== null)).toHaveLength(2);
+  });
+
+  describe("mutualOnly", () => {
+    it("excludes a group from a person's edges when the group didn't rank them back", () => {
+      const people = [person("alice", ["eng"])];
+      const groups = [group("eng", 1, ["bob"])];
+      const result = runOptimalAssignment(people, groups, { mutualOnly: true });
+      expect(result.assignments).toEqual([{ personId: "alice", groupId: null }]);
+    });
+
+    it("still matches when both sides ranked each other", () => {
+      const people = [person("alice", ["eng"])];
+      const groups = [group("eng", 1, ["alice"])];
+      const result = runOptimalAssignment(people, groups, { mutualOnly: true });
+      expect(result.assignments).toEqual([{ personId: "alice", groupId: "eng" }]);
+    });
+  });
+
+  describe("fillGroups", () => {
+    it("force-fills a seat left open by the flow solve", () => {
+      const people = [person("alice", ["eng"]), person("bob", ["eng"])];
+      const groups = [group("eng", 1), group("design", 1)];
+      const result = runOptimalAssignment(people, groups, { fillGroups: true });
+      const unmatched = result.assignments.filter((a) => a.groupId === null);
+      expect(unmatched).toHaveLength(0);
+      expect(result.forcedPersonIds).toHaveLength(1);
+    });
+
+    it("respects mutualOnly when force-filling", () => {
+      const people = [person("alice", ["eng"]), person("bob", ["eng"])];
+      const groups = [group("eng", 1), group("design", 1, ["carol"])];
+      const result = runOptimalAssignment(people, groups, { fillGroups: true, mutualOnly: true });
+      const unmatched = result.assignments.filter((a) => a.groupId === null);
+      expect(unmatched).toHaveLength(1);
+      expect(result.forcedPersonIds).toEqual([]);
+    });
   });
 });
 

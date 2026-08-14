@@ -12,6 +12,10 @@ export interface Session {
   matchingMethod?: "stable" | "optimal";
   /** For matchingMethod "optimal": which side's preferences to weight more heavily. Defaults to "people". Absent on older sessions. */
   optimalPriority?: "people" | "balanced" | "groups";
+  /** When true, a person and group can only be paired if each side ranked the other (sides with no stated preferences are indifferent and always satisfy this). Absent on older sessions. */
+  mutualOnly?: boolean;
+  /** When true, any group seats still open after matching are force-filled with remaining unmatched people, even if neither side ranked the other (still subject to mutualOnly if also set). Absent on older sessions. */
+  fillGroups?: boolean;
 }
 
 export interface Person {
@@ -36,6 +40,8 @@ export interface MatchResult {
   shiftedPersonIds: string[];
   /** People left unmatched by stable matching who were seated into a group via fillUnmatched. */
   backfilledPersonIds: string[];
+  /** People seated into a group via fillGroups despite neither side ranking the other. */
+  forcedPersonIds: string[];
 }
 
 export interface Assignment {

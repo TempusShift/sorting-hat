@@ -11,6 +11,8 @@ interface AlternativesPanelProps {
   fillUnmatched?: boolean;
   matchingMethod?: MatchingMethod;
   optimalPriority?: OptimalPriority;
+  mutualOnly?: boolean;
+  fillGroups?: boolean;
 }
 
 export function AlternativesPanel({
@@ -20,11 +22,15 @@ export function AlternativesPanel({
   fillUnmatched,
   matchingMethod,
   optimalPriority,
+  mutualOnly,
+  fillGroups,
 }: AlternativesPanelProps) {
   const alternatives = computeAlternatives(people, groups, assignments, {
     fillUnmatched,
     method: matchingMethod,
     priority: optimalPriority,
+    mutualOnly,
+    fillGroups,
   });
   const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
   const assignmentByPerson = new Map(assignments.map((a) => [a.personId, a]));

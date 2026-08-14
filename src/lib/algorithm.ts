@@ -24,6 +24,17 @@ interface GaleShapleyOptions {
    * search), never into a group nobody in the chain actually ranked.
    */
   fillUnmatched?: boolean;
+  /** Restrict pairing to sides that ranked each other (indifferent sides always qualify). */
+  mutualOnly?: boolean;
+  /** Force-fill any seats still open after matching (and fillUnmatched) with remaining unmatched people, regardless of preference — still subject to mutualOnly. */
+  fillGroups?: boolean;
+}
+
+/** Whether a person and group are allowed to pair under mutualOnly: each side that stated any preferences must have included the other (indifferent sides always qualify). */
+function isMutuallyEligible(person: Person, group: Group): boolean {
+  const personOk = person.rankings.length === 0 || person.rankings.includes(group.id);
+  const groupOk = group.rankings.length === 0 || group.rankings.includes(person.id);
+  return personOk && groupOk;
 }
 
 /**
@@ -63,7 +74,16 @@ export function runGaleShapley(
   const groupMap = new Map(groups.map((g) => [g.id, g]));
   const allGroupIds = groups.map((g) => g.id);
   const effectiveRankings = new Map<string, string[]>(
-    people.map((p) => [p.id, p.rankings.length > 0 ? p.rankings : allGroupIds]),
+    people.map((p) => {
+      const base = p.rankings.length > 0 ? p.rankings : allGroupIds;
+      const filtered = options.mutualOnly
+        ? base.filter((groupId) => {
+            const group = groupMap.get(groupId);
+            return group !== undefined && isMutuallyEligible(p, group);
+          })
+        : base;
+      return [p.id, filtered];
+    }),
   );
 
   const tentative = new Map<string, string[]>(groups.map((g) => [g.id, []]));
@@ -156,6 +176,26 @@ export function runGaleShapley(
     }
   }
 
+  const forced = new Set<string>();
+  if (options.fillGroups) {
+    // Last resort: seats still open at this point can't belong to any remaining
+    // unmatched person's own ranked list (GS never turns away an open seat), so the
+    // only way to fill them is to pair outside stated preference entirely.
+    for (const group of groups) {
+      if (exclude.has(group.id)) continue;
+      const members = tentative.get(group.id)!;
+      if (members.length >= group.capacity) continue;
+      for (const p of people) {
+        if (members.length >= group.capacity) break;
+        if (matchedGroup.get(p.id) !== null) continue;
+        if (options.mutualOnly && !isMutuallyEligible(p, group)) continue;
+        members.push(p.id);
+        matchedGroup.set(p.id, group.id);
+        forced.add(p.id);
+      }
+    }
+  }
+
   const assignments: Assignment[] = people.map((p) => ({
     personId: p.id,
     groupId: matchedGroup.get(p.id) ?? null,
@@ -167,6 +207,7 @@ export function runGaleShapley(
     bumpedPersonIds: [...bumped],
     shiftedPersonIds: [...shifted],
     backfilledPersonIds: [...backfilled],
+    forcedPersonIds: [...forced],
   };
 }
 
@@ -245,6 +286,10 @@ interface OptimalAssignmentOptions {
   excludeGroupIds?: string[];
   /** Which side's preferences to weight more heavily. Defaults to "people". */
   priority?: OptimalPriority;
+  /** Restrict pairing to sides that ranked each other (indifferent sides always qualify). */
+  mutualOnly?: boolean;
+  /** Force-fill any seats still open after the flow solve with remaining unmatched people, regardless of preference — still subject to mutualOnly. */
+  fillGroups?: boolean;
 }
 
 /**
@@ -289,6 +334,7 @@ export function runOptimalAssignment(
       if (seen.has(groupId)) return;
       const gi = groupIndexById.get(groupId);
       if (gi === undefined) return;
+      if (options.mutualOnly && !isMutuallyEligible(p, groupById.get(groupId)!)) return;
       seen.add(groupId);
       const personCost = p.rankings.length > 0 ? rankIdx : 0;
       const groupCost = groupPreferenceCost(groupById.get(groupId)!, p.id);
@@ -305,11 +351,43 @@ export function runOptimalAssignment(
 
   flow.run(source, sink);
 
-  const assignments: Assignment[] = people.map((p) => {
-    const edges = personEdges.get(p.id)!;
-    const used = edges.find((e) => flow.remainingCap(e.node, e.edgeIdx) === 0);
-    return { personId: p.id, groupId: used?.groupId ?? null };
-  });
+  const matchedGroup = new Map<string, string | null>(
+    people.map((p) => {
+      const edges = personEdges.get(p.id)!;
+      const used = edges.find((e) => flow.remainingCap(e.node, e.edgeIdx) === 0);
+      return [p.id, used?.groupId ?? null];
+    }),
+  );
+
+  const forced = new Set<string>();
+  if (options.fillGroups) {
+    // Mirrors the fillGroups pass in runGaleShapley: seats the flow solve left open
+    // can't belong to any remaining unmatched person's edges, so filling them means
+    // pairing outside stated preference entirely.
+    const remainingCapacity = new Map<string, number>(
+      activeGroups.map((g) => [
+        g.id,
+        g.capacity - people.filter((p) => matchedGroup.get(p.id) === g.id).length,
+      ]),
+    );
+    for (const group of activeGroups) {
+      let capacity = remainingCapacity.get(group.id)!;
+      if (capacity <= 0) continue;
+      for (const p of people) {
+        if (capacity <= 0) break;
+        if (matchedGroup.get(p.id) !== null) continue;
+        if (options.mutualOnly && !isMutuallyEligible(p, group)) continue;
+        matchedGroup.set(p.id, group.id);
+        forced.add(p.id);
+        capacity--;
+      }
+    }
+  }
+
+  const assignments: Assignment[] = people.map((p) => ({
+    personId: p.id,
+    groupId: matchedGroup.get(p.id) ?? null,
+  }));
 
   return {
     assignments,
@@ -317,6 +395,7 @@ export function runOptimalAssignment(
     bumpedPersonIds: [],
     shiftedPersonIds: [],
     backfilledPersonIds: [],
+    forcedPersonIds: [...forced],
   };
 }
 
@@ -413,7 +492,13 @@ export function computeAlternatives(
   people: Person[],
   groups: Group[],
   assignments: Assignment[],
-  options: { fillUnmatched?: boolean; method?: MatchingMethod; priority?: OptimalPriority } = {},
+  options: {
+    fillUnmatched?: boolean;
+    method?: MatchingMethod;
+    priority?: OptimalPriority;
+    mutualOnly?: boolean;
+    fillGroups?: boolean;
+  } = {},
 ): Map<string, string | null> {
   const alternatives = new Map<string, string | null>();
   const assignedGroup = new Map(assignments.map((a) => [a.personId, a.groupId]));
@@ -423,8 +508,18 @@ export function computeAlternatives(
     byExcludedGroup.set(
       groupId,
       options.method === "optimal"
-        ? runOptimalAssignment(people, groups, { excludeGroupIds: [groupId], priority: options.priority })
-        : runGaleShapley(people, groups, { excludeGroupIds: [groupId], fillUnmatched: options.fillUnmatched }),
+        ? runOptimalAssignment(people, groups, {
+            excludeGroupIds: [groupId],
+            priority: options.priority,
+            mutualOnly: options.mutualOnly,
+            fillGroups: options.fillGroups,
+          })
+        : runGaleShapley(people, groups, {
+            excludeGroupIds: [groupId],
+            fillUnmatched: options.fillUnmatched,
+            mutualOnly: options.mutualOnly,
+            fillGroups: options.fillGroups,
+          }),
     );
   }
 
