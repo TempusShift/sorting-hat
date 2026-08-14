@@ -132,10 +132,14 @@ export function StatsPanel({
 
   const groupRanks: number[] = [];
   const groupHappinessScores: number[] = [];
+  // One averaged score per group (its filled slots only; unfilled slots neither help nor hurt),
+  // so a group's size doesn't skew its weight in the cross-group sum vs. other groups.
+  const groupHappinessAverages: number[] = [];
   let groupUnrankedMatchCount = 0;
   const perGroupStats = groups.map((g) => {
     const memberIds = assignments.filter((a) => a.groupId === g.id).map((a) => a.personId);
     const ranks: number[] = [];
+    const memberHappiness: number[] = [];
     let unranked = 0;
     for (const personId of memberIds) {
       const rank = getGroupAchievedRank(g, personId);
@@ -150,8 +154,16 @@ export function StatsPanel({
       if (!isUnranked || merged) {
         const evicted = evictionsByGroupAndBumper.get(`${g.id}|${personId}`) ?? [];
         const happiness = getAdjustedGroupHappiness(g, personId, evicted);
-        if (happiness !== null) groupHappinessScores.push(happiness);
+        if (happiness !== null) {
+          groupHappinessScores.push(happiness);
+          memberHappiness.push(happiness);
+        }
       }
+    }
+    if (memberHappiness.length > 0) {
+      groupHappinessAverages.push(
+        memberHappiness.reduce((a, b) => a + b, 0) / memberHappiness.length,
+      );
     }
     const groupMean = ranks.length > 0 ? ranks.reduce((a, b) => a + b, 0) / ranks.length : null;
     return {
@@ -176,7 +188,7 @@ export function StatsPanel({
             sortedGroupRanks[sortedGroupRanks.length / 2]) /
           2;
 
-  const groupHappinessSum = groupHappinessScores.reduce((a, b) => a + b, 0);
+  const groupHappinessSum = groupHappinessAverages.reduce((a, b) => a + b, 0);
   const groupDistributionData = buildDistribution(
     groupHappinessScores,
     groupUnrankedMatchCount,
@@ -501,11 +513,12 @@ export function StatsPanel({
                   Sum of happiness scores (groups)
                 </Text>
                 <Text size="xl" fw={700}>
-                  {groupHappinessScores.length > 0 ? groupHappinessSum : "—"}
+                  {groupHappinessAverages.length > 0 ? groupHappinessSum.toFixed(2) : "—"}
                 </Text>
                 <Text size="xs" c="dimmed" mt={4}>
-                  Across {groupHappinessScores.length} scored{" "}
-                  {groupHappinessScores.length === 1 ? "match" : "matches"}
+                  Across {groupHappinessAverages.length} scored{" "}
+                  {groupHappinessAverages.length === 1 ? "group" : "groups"}, each averaged across
+                  its own filled slots so group size doesn&apos;t skew the total
                   {!merged && groupUnrankedMatchCount > 0
                     ? ` (excludes ${groupUnrankedMatchCount} unranked match${
                         groupUnrankedMatchCount === 1 ? "" : "es"
