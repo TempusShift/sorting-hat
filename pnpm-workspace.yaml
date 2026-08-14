@@ -1,0 +1,5 @@
+overrides:
+  baseline-browser-mapping: 2.11.13
+
+onlyBuiltDependencies:
+  - unrs-resolver
