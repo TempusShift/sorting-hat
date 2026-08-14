@@ -1,0 +1,183 @@
+"use client";
+
+import { useEffect } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import { Alert, Button, Container, Group, Loader, Stack, Switch, Tabs, Text, Title } from "@mantine/core";
+import {
+  IconArrowsShuffle,
+  IconDownload,
+  IconEdit,
+  IconGitCompare,
+  IconListDetails,
+  IconChartBar,
+  IconShieldCheck,
+} from "@tabler/icons-react";
+import { AlternativesPanel } from "@/components/AlternativesPanel";
+import { AssignmentsTable } from "@/components/AssignmentsTable";
+import { NewSessionButton } from "@/components/NewSessionButton";
+import { StabilityPanel } from "@/components/StabilityPanel";
+import { StatsPanel } from "@/components/StatsPanel";
+import { exportAssignmentsCsv } from "@/lib/csv";
+import { useSessionStore } from "@/store/sessionStore";
+
+export default function ResultsPage() {
+  const params = useParams<{ id: string }>();
+  const sessionId = params.id;
+
+  const hydrate = useSessionStore((s) => s.hydrate);
+  const hydrated = useSessionStore((s) => s.hydrated);
+  const session = useSessionStore((s) => s.sessions.find((sess) => sess.id === sessionId));
+  const runMatching = useSessionStore((s) => s.runMatching);
+  const setFillUnmatched = useSessionStore((s) => s.setFillUnmatched);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  if (!hydrated) {
+    return (
+      <Container size="lg" py="xl">
+        <Loader />
+      </Container>
+    );
+  }
+
+  if (!session) {
+    return (
+      <Container size="lg" py="xl">
+        <Alert color="red" title="Session not found">
+          This session doesn&apos;t exist.{" "}
+          <Text component={Link} href="/" td="underline">
+            Go back home
+          </Text>
+        </Alert>
+      </Container>
+    );
+  }
+
+  if (!session.result) {
+    return (
+      <Container size="lg" py="xl">
+        <Alert color="yellow" title="No results yet">
+          This session hasn&apos;t been matched yet.{" "}
+          <Text component={Link} href={`/session/${sessionId}/setup`} td="underline">
+            Go to setup
+          </Text>
+        </Alert>
+      </Container>
+    );
+  }
+
+  const { people, groups, result, name: sessionName } = session;
+
+  function handleExport() {
+    if (!result) return;
+    const csv = exportAssignmentsCsv(people, groups, result.assignments);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${sessionName.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-assignments.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <Container size="lg" py="xl">
+      <Group justify="space-between" mb="md" wrap="wrap">
+        <Title order={2}>{session.name}</Title>
+        <Group gap="xs">
+          <Button
+            variant="default"
+            leftSection={<IconEdit size={16} />}
+            component={Link}
+            href={`/session/${sessionId}/setup`}
+          >
+            Edit session
+          </Button>
+          <Button leftSection={<IconArrowsShuffle size={16} />} onClick={() => runMatching(sessionId)}>
+            Re-run
+          </Button>
+          <NewSessionButton variant="default" />
+        </Group>
+      </Group>
+
+      <Switch
+        mb="xl"
+        label="Avoid leaving anyone unmatched when capacity allows"
+        checked={session.fillUnmatched ?? false}
+        onChange={(e) => {
+          setFillUnmatched(sessionId, e.currentTarget.checked);
+          runMatching(sessionId);
+        }}
+      />
+
+      <Tabs defaultValue="assignments">
+        <Tabs.List mb="md">
+          <Tabs.Tab value="assignments" leftSection={<IconListDetails size={16} />}>
+            Assignments
+          </Tabs.Tab>
+          <Tabs.Tab value="stats" leftSection={<IconChartBar size={16} />}>
+            Stats
+          </Tabs.Tab>
+          <Tabs.Tab value="stability" leftSection={<IconShieldCheck size={16} />}>
+            Stability
+          </Tabs.Tab>
+          <Tabs.Tab value="alternatives" leftSection={<IconGitCompare size={16} />}>
+            Alternatives
+          </Tabs.Tab>
+          <Tabs.Tab value="export" leftSection={<IconDownload size={16} />}>
+            Export
+          </Tabs.Tab>
+        </Tabs.List>
+
+        <Tabs.Panel value="assignments">
+          <AssignmentsTable
+            people={people}
+            groups={groups}
+            assignments={result.assignments}
+            bumpedPersonIds={result.bumpedPersonIds}
+            backfilledPersonIds={result.backfilledPersonIds}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="stats">
+          <StatsPanel
+            people={people}
+            groups={groups}
+            assignments={result.assignments}
+            bumpedPersonIds={result.bumpedPersonIds}
+            backfilledPersonIds={result.backfilledPersonIds}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="stability">
+          <StabilityPanel people={people} groups={groups} assignments={result.assignments} />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="alternatives">
+          <AlternativesPanel
+            people={people}
+            groups={groups}
+            assignments={result.assignments}
+            fillUnmatched={session.fillUnmatched}
+          />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="export">
+          <Stack align="flex-start">
+            <Text size="sm" c="dimmed">
+              Download the assignments as a CSV with each person&apos;s name, assigned group, and rank achieved.
+            </Text>
+            <Button leftSection={<IconDownload size={16} />} onClick={handleExport}>
+              Download CSV
+            </Button>
+          </Stack>
+        </Tabs.Panel>
+      </Tabs>
+    </Container>
+  );
+}

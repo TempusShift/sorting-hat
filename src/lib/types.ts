@@ -6,6 +6,8 @@ export interface Session {
   people: Person[];
   groups: Group[];
   result: MatchResult | null;
+  /** When true, unmatched people are backfilled into any group with open capacity. Absent on older sessions. */
+  fillUnmatched?: boolean;
 }
 
 export interface Person {
@@ -24,6 +26,10 @@ export interface Group {
 export interface MatchResult {
   assignments: Assignment[];
   runAt: string;
+  /** People evicted from a tentative match at least once during matching (may have been rematched). */
+  bumpedPersonIds: string[];
+  /** People moved to a different group they themselves ranked, to free a slot for someone else via fillUnmatched. */
+  shiftedPersonIds: string[];
 }
 
 export interface Assignment {
