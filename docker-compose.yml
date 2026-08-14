@@ -1,0 +1,8 @@
+services:
+  sorting-hat:
+    build: .
+    ports:
+      - "3026:3026"
+    environment:
+      - PORT=3026
+    restart: unless-stopped
