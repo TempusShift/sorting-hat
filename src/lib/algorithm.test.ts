@@ -2,8 +2,14 @@ import { describe, expect, it } from "vitest";
 import {
   computeAlternatives,
   computeGroupFillRates,
+  DEFAULT_OPTIMAL_PRIORITY,
   findBlockingPairs,
   getAchievedRank,
+  getAdjustedGroupHappiness,
+  getAdjustedPersonHappiness,
+  getGroupHappinessRank,
+  getHappinessRank,
+  OPTIMAL_PRIORITY_MAX,
   runGaleShapley,
   runOptimalAssignment,
 } from "./algorithm";
@@ -56,14 +62,28 @@ describe("runGaleShapley", () => {
     expect(aliceAssignment?.groupId).toBeNull();
   });
 
-  it("fills indifferent groups FIFO without evicting earlier arrivals", () => {
+  it("keeps the earlier arrival in an indifferent group when tied on their own preference", () => {
     const people = [person("alice", ["eng"]), person("bob", ["eng"])];
-    const groups = [group("eng", 1)]; // no preferences -> FIFO
+    const groups = [group("eng", 1)]; // no preferences; both rank eng identically -> FIFO
     const result = runGaleShapley(people, groups);
     const aliceAssignment = result.assignments.find((a) => a.personId === "alice");
     const bobAssignment = result.assignments.find((a) => a.personId === "bob");
     expect(aliceAssignment?.groupId).toBe("eng");
     expect(bobAssignment?.groupId).toBeNull();
+  });
+
+  it("lets a person who wants an indifferent group more evict a less-enthusiastic earlier arrival", () => {
+    // eng has no stated preferences, so it can't judge candidates itself. Alice only
+    // gets to eng as her second choice (design is unknown/skipped), while bob ranks
+    // eng first. Bob should bump alice out once eng is full.
+    const people = [person("alice", ["ghost", "eng"]), person("bob", ["eng"])];
+    const groups = [group("eng", 1)];
+    const result = runGaleShapley(people, groups);
+    const aliceAssignment = result.assignments.find((a) => a.personId === "alice");
+    const bobAssignment = result.assignments.find((a) => a.personId === "bob");
+    expect(bobAssignment?.groupId).toBe("eng");
+    expect(aliceAssignment?.groupId).toBeNull();
+    expect(result.bumpedPersonIds).toContain("alice");
   });
 
   it("leaves a person unmatched if all their preferences are exhausted or full", () => {
@@ -255,6 +275,27 @@ describe("runGaleShapley", () => {
       const seated = result.assignments.filter((a) => a.groupId === "eng");
       expect(seated).toHaveLength(1);
     });
+
+    it("tops an empty group up to one member, not to full capacity", () => {
+      // "other" isn't a real group, so none of these three match during normal GS —
+      // they only get seated via the fillGroups pass.
+      const people = [person("alice", ["other"]), person("bob", ["other"]), person("carol", ["other"])];
+      const groups = [group("eng", 3)];
+      const result = runGaleShapley(people, groups, { fillGroups: true });
+      const seated = result.assignments.filter((a) => a.groupId === "eng");
+      expect(seated).toHaveLength(1);
+      expect(result.assignments.filter((a) => a.groupId === null)).toHaveLength(2);
+    });
+
+    it("leaves an already-nonempty group alone even if under capacity", () => {
+      const people = [person("alice", ["eng"]), person("bob", ["other"])];
+      const groups = [group("eng", 3)];
+      const result = runGaleShapley(people, groups, { fillGroups: true });
+      const byId = new Map(result.assignments.map((a) => [a.personId, a.groupId]));
+      expect(byId.get("alice")).toBe("eng");
+      expect(byId.get("bob")).toBeNull();
+      expect(result.forcedPersonIds).toEqual([]);
+    });
   });
 });
 
@@ -316,7 +357,8 @@ describe("runOptimalAssignment", () => {
   });
 
   it("ignores group-side preferences by default (may not be a stable matching)", () => {
-    // eng prefers alice, but the default "people" priority doesn't consult group preference at all.
+    // eng prefers alice, but bob only ranked eng, leaving alice/design + bob/eng as the
+    // only feasible pairing regardless of priority.
     const people = [person("alice", ["design", "eng"]), person("bob", ["eng"])];
     const groups = [group("eng", 1, ["alice"]), group("design", 1)];
     const result = runOptimalAssignment(people, groups);
@@ -325,21 +367,21 @@ describe("runOptimalAssignment", () => {
     expect(byId.get("bob")).toBe("eng");
   });
 
-  it("with priority: groups, defers to which candidate each group prefers over the people's own rank order", () => {
+  it("with priority 8 (groups only), defers to which candidate each group prefers over the people's own rank order", () => {
     // alice ranks eng first, bob ranks design first — but eng only wants bob and design
     // only wants alice. Both arrangements match everyone, so priority decides the winner.
     const people = [person("alice", ["eng", "design"]), person("bob", ["design", "eng"])];
     const groups = [group("eng", 1, ["bob"]), group("design", 1, ["alice"])];
-    const result = runOptimalAssignment(people, groups, { priority: "groups" });
+    const result = runOptimalAssignment(people, groups, { priority: OPTIMAL_PRIORITY_MAX });
     const byId = new Map(result.assignments.map((a) => [a.personId, a.groupId]));
     expect(byId.get("alice")).toBe("design");
     expect(byId.get("bob")).toBe("eng");
   });
 
-  it("with priority: balanced, still never assigns anyone outside their own rankings", () => {
+  it("with priority balanced (4), still never assigns anyone outside their own rankings", () => {
     const people = [person("alice", ["eng", "design"]), person("bob", ["design", "eng"])];
     const groups = [group("eng", 1, ["bob"]), group("design", 1, ["alice"])];
-    const result = runOptimalAssignment(people, groups, { priority: "balanced" });
+    const result = runOptimalAssignment(people, groups, { priority: DEFAULT_OPTIMAL_PRIORITY });
     for (const a of result.assignments) {
       const p = people.find((person) => person.id === a.personId)!;
       expect(a.groupId === null || p.rankings.includes(a.groupId)).toBe(true);
@@ -381,6 +423,17 @@ describe("runOptimalAssignment", () => {
       expect(unmatched).toHaveLength(1);
       expect(result.forcedPersonIds).toEqual([]);
     });
+
+    it("tops an empty group up to one member, not to full capacity", () => {
+      // "other" isn't a real group, so none of these three match during the flow solve —
+      // they only get seated via the fillGroups pass.
+      const people = [person("alice", ["other"]), person("bob", ["other"]), person("carol", ["other"])];
+      const groups = [group("eng", 3)];
+      const result = runOptimalAssignment(people, groups, { fillGroups: true });
+      const seated = result.assignments.filter((a) => a.groupId === "eng");
+      expect(seated).toHaveLength(1);
+      expect(result.assignments.filter((a) => a.groupId === null)).toHaveLength(2);
+    });
   });
 });
 
@@ -395,6 +448,61 @@ describe("getAchievedRank", () => {
     const alice = person("alice", ["design"]);
     expect(getAchievedRank(alice, null)).toBeNull();
     expect(getAchievedRank(alice, "eng")).toBeNull();
+  });
+});
+
+describe("getHappinessRank / getGroupHappinessRank", () => {
+  it("scores an unranked match one worse than the least-preferred ranked one", () => {
+    const alice = person("alice", ["a", "b", "c", "d", "e"]);
+    expect(getHappinessRank(alice, "a")).toBe(1);
+    expect(getHappinessRank(alice, "e")).toBe(5);
+    expect(getHappinessRank(alice, "unranked-group")).toBe(6);
+  });
+
+  it("scores an indifferent person's match as rank 1", () => {
+    const alice = person("alice", []);
+    expect(getHappinessRank(alice, "anything")).toBe(1);
+  });
+
+  it("returns null when unmatched", () => {
+    const alice = person("alice", ["a"]);
+    expect(getHappinessRank(alice, null)).toBeNull();
+  });
+
+  it("mirrors the same rule from the group's side", () => {
+    const eng = group("eng", 2, ["alice", "bob"]);
+    expect(getGroupHappinessRank(eng, "alice")).toBe(1);
+    expect(getGroupHappinessRank(eng, "carol")).toBe(3);
+  });
+});
+
+describe("getAdjustedPersonHappiness / getAdjustedGroupHappiness", () => {
+  it("leaves the score alone when there was no bump", () => {
+    const alice = person("alice", ["a", "b", "c"]);
+    expect(getAdjustedPersonHappiness(alice, "b", undefined)).toBe(2);
+  });
+
+  it("penalizes landing worse than the group they were bumped out of", () => {
+    const alice = person("alice", ["a", "b", "c"]);
+    // Bumped out of "a" (rank 1), landed in "c" (rank 3): a 2-slot drop adds a 2-point penalty.
+    expect(
+      getAdjustedPersonHappiness(alice, "c", { groupId: "a", byPersonId: "bob" }),
+    ).toBe(5);
+  });
+
+  it("rewards landing better than the group they were bumped out of", () => {
+    const alice = person("alice", ["a", "b", "c"]);
+    // Bumped out of "c" (rank 3), landed in "a" (rank 1): a 2-slot gain subtracts 2 points.
+    expect(
+      getAdjustedPersonHappiness(alice, "a", { groupId: "c", byPersonId: "bob" }),
+    ).toBe(-1);
+  });
+
+  it("mirrors the bump adjustment for a group over each person it evicted", () => {
+    const eng = group("eng", 1, ["alice", "bob", "carol"]);
+    // eng evicted carol (rank 3) to seat alice (rank 1): a 2-slot gain subtracts 2 points.
+    expect(getAdjustedGroupHappiness(eng, "alice", ["carol"])).toBe(-1);
+    expect(getAdjustedGroupHappiness(eng, "alice", [])).toBe(1);
   });
 });
 
@@ -443,19 +551,64 @@ describe("findBlockingPairs", () => {
 });
 
 describe("computeAlternatives", () => {
-  it("finds the next-best group if the assigned group were removed", () => {
+  it("finds an open seat the person could move into without bumping anyone", () => {
+    // design has 2 seats and only 1 filled, so alice could move there for free.
+    const people = [person("alice", ["eng", "design"]), person("bob", ["design"])];
+    const groups = [group("eng", 1), group("design", 2)];
+    const result = runGaleShapley(people, groups);
+    const alternatives = computeAlternatives(people, groups, result.assignments);
+    // alice ranked eng #1 and design #2, so moving is a worse outcome for her (+1);
+    // group-side nets to 0 since both groups are equally indifferent (rankings-less).
+    expect(alternatives.get("alice")).toEqual({
+      groupId: "design",
+      peopleHappinessDelta: 1,
+      groupHappinessDelta: 0,
+    });
+  });
+
+  it("finds no alternative when every other ranked group is already full", () => {
     const people = [person("alice", ["eng", "design"]), person("bob", ["design"])];
     const groups = [group("eng", 1), group("design", 1)];
     const result = runGaleShapley(people, groups);
     const alternatives = computeAlternatives(people, groups, result.assignments);
-    expect(alternatives.get("alice")).toBe("design");
+    expect(alternatives.get("alice")).toEqual({
+      groupId: null,
+      peopleHappinessDelta: null,
+      groupHappinessDelta: null,
+    });
   });
 
-  it("maps unmatched people to null", () => {
+  it("maps unmatched people with no open seat available to a null impact", () => {
     const people = [person("alice", ["eng"])];
     const groups = [group("eng", 0)];
     const result = runGaleShapley(people, groups);
     const alternatives = computeAlternatives(people, groups, result.assignments);
-    expect(alternatives.get("alice")).toBeNull();
+    expect(alternatives.get("alice")).toEqual({
+      groupId: null,
+      peopleHappinessDelta: null,
+      groupHappinessDelta: null,
+    });
+  });
+
+  it("offers an open-seat alternative to someone currently unmatched", () => {
+    const people = [person("alice", ["design"])];
+    const groups = [group("design", 1)];
+    const assignments = [{ personId: "alice", groupId: null }];
+    const alternatives = computeAlternatives(people, groups, assignments);
+    expect(alternatives.get("alice")).toEqual({
+      groupId: "design",
+      peopleHappinessDelta: -2,
+      groupHappinessDelta: -1,
+    });
+  });
+
+  it("never suggests a move into a full group, even one that prefers this person", () => {
+    // design ranks alice over bob, so a full rerun would bump bob to seat alice there —
+    // but computeAlternatives should never suggest that, only genuinely open seats.
+    const people = [person("alice", ["eng", "design"]), person("bob", ["design"])];
+    const groups = [group("eng", 1, ["alice"]), group("design", 1, ["bob", "alice"])];
+    const result = runGaleShapley(people, groups);
+    const alternatives = computeAlternatives(people, groups, result.assignments);
+    expect(alternatives.get("alice")?.groupId).toBeNull();
   });
 });

@@ -1,12 +1,22 @@
 import { create } from "zustand";
 import { v4 as uuidv4 } from "uuid";
-import { runGaleShapley, runOptimalAssignment, type MatchingMethod, type OptimalPriority } from "@/lib/algorithm";
+import {
+  DEFAULT_OPTIMAL_PRIORITY,
+  runGaleShapley,
+  runOptimalAssignment,
+  type MatchingMethod,
+  type OptimalPriority,
+} from "@/lib/algorithm";
+import * as matchCache from "@/lib/matchCache";
 import * as storage from "@/lib/storage";
 import type { Group, Person, Session } from "@/lib/types";
 
 interface SessionStore {
   sessions: Session[];
   hydrated: boolean;
+  isMatching: boolean;
+  /** Marks matching as pending/settled without running it — for showing the loading state during a debounce window before `runMatching` itself fires. */
+  setMatchingPending: (pending: boolean) => void;
   hydrate: () => void;
   createSession: (name: string) => Session;
   getSession: (id: string) => Session | undefined;
@@ -17,7 +27,7 @@ interface SessionStore {
   setOptimalPriority: (id: string, optimalPriority: OptimalPriority) => void;
   setMutualOnly: (id: string, mutualOnly: boolean) => void;
   setFillGroups: (id: string, fillGroups: boolean) => void;
-  runMatching: (id: string) => void;
+  runMatching: (id: string) => Promise<void>;
   deleteSession: (id: string) => void;
 }
 
@@ -28,6 +38,9 @@ function touch(session: Session): Session {
 export const useSessionStore = create<SessionStore>((set, get) => ({
   sessions: [],
   hydrated: false,
+  isMatching: false,
+
+  setMatchingPending: (pending) => set({ isMatching: pending }),
 
   hydrate: () => {
     if (get().hydrated) return;
@@ -46,7 +59,7 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       result: null,
       fillUnmatched: false,
       matchingMethod: "stable",
-      optimalPriority: "people",
+      optimalPriority: DEFAULT_OPTIMAL_PRIORITY,
       mutualOnly: false,
       fillGroups: false,
     };
@@ -115,24 +128,39 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
 
   runMatching: (id) => {
     const session = get().getSession(id);
-    if (!session) return;
-    const mutualOnly = session.mutualOnly ?? false;
-    const fillGroups = session.fillGroups ?? false;
-    const result =
-      session.matchingMethod === "optimal"
-        ? runOptimalAssignment(session.people, session.groups, {
-            priority: session.optimalPriority ?? "people",
-            mutualOnly,
-            fillGroups,
-          })
-        : runGaleShapley(session.people, session.groups, {
-            fillUnmatched: session.fillUnmatched ?? false,
-            mutualOnly,
-            fillGroups,
-          });
-    const updated = touch({ ...session, result });
-    storage.saveSession(updated);
-    set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)) });
+    if (!session) return Promise.resolve();
+    set({ isMatching: true });
+    // Yield a tick so the "recalculating" state can paint before the (possibly
+    // slow, synchronous) matching algorithm blocks the main thread.
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        const current = get().getSession(id);
+        if (!current) {
+          set({ isMatching: false });
+          resolve();
+          return;
+        }
+        const mutualOnly = current.mutualOnly ?? false;
+        const fillGroups = current.fillGroups ?? false;
+        const fillUnmatched = current.fillUnmatched ?? false;
+        const optimalPriority = current.optimalPriority ?? DEFAULT_OPTIMAL_PRIORITY;
+        const matchingMethod = current.matchingMethod ?? "stable";
+        const cacheOptions = { matchingMethod, fillUnmatched, optimalPriority, mutualOnly, fillGroups };
+
+        const cached = matchCache.getCachedResult(id, current.people, current.groups, cacheOptions);
+        const result =
+          cached ??
+          (matchingMethod === "optimal"
+            ? runOptimalAssignment(current.people, current.groups, { priority: optimalPriority, mutualOnly, fillGroups })
+            : runGaleShapley(current.people, current.groups, { fillUnmatched, mutualOnly, fillGroups }));
+        if (!cached) matchCache.setCachedResult(id, current.people, current.groups, cacheOptions, result);
+
+        const updated = touch({ ...current, result });
+        storage.saveSession(updated);
+        set({ sessions: get().sessions.map((s) => (s.id === id ? updated : s)), isMatching: false });
+        resolve();
+      }, 0);
+    });
   },
 
   deleteSession: (id) => {

@@ -11,6 +11,7 @@ import {
   Container,
   Group,
   Loader,
+  LoadingOverlay,
   SegmentedControl,
   Stack,
   Switch,
@@ -20,7 +21,6 @@ import {
 } from "@mantine/core";
 import {
   IconArrowsDiff,
-  IconArrowsShuffle,
   IconDownload,
   IconEdit,
   IconGitCompare,
@@ -33,9 +33,11 @@ import { AlternativesPanel } from "@/components/AlternativesPanel";
 import { AssignmentsTable } from "@/components/AssignmentsTable";
 import { CompareMethodsPanel } from "@/components/CompareMethodsPanel";
 import { NewSessionButton } from "@/components/NewSessionButton";
+import { OptimalPrioritySlider } from "@/components/OptimalPrioritySlider";
 import { StabilityPanel } from "@/components/StabilityPanel";
 import { StatsPanel } from "@/components/StatsPanel";
 import { exportAssignmentsCsv } from "@/lib/csv";
+import * as matchCache from "@/lib/matchCache";
 import { useSessionStore } from "@/store/sessionStore";
 
 export default function ResultsPage() {
@@ -44,8 +46,12 @@ export default function ResultsPage() {
 
   const hydrate = useSessionStore((s) => s.hydrate);
   const hydrated = useSessionStore((s) => s.hydrated);
-  const session = useSessionStore((s) => s.sessions.find((sess) => sess.id === sessionId));
+  const session = useSessionStore((s) =>
+    s.sessions.find((sess) => sess.id === sessionId),
+  );
   const runMatching = useSessionStore((s) => s.runMatching);
+  const isMatching = useSessionStore((s) => s.isMatching);
+  const setMatchingPending = useSessionStore((s) => s.setMatchingPending);
   const setFillUnmatched = useSessionStore((s) => s.setFillUnmatched);
   const setMatchingMethod = useSessionStore((s) => s.setMatchingMethod);
   const setOptimalPriority = useSessionStore((s) => s.setOptimalPriority);
@@ -78,11 +84,22 @@ export default function ResultsPage() {
   }
 
   if (!session.result) {
+    if (isMatching) {
+      return (
+        <Container size="lg" py="xl">
+          <Loader />
+        </Container>
+      );
+    }
     return (
       <Container size="lg" py="xl">
         <Alert color="yellow" title="No results yet">
           This session hasn&apos;t been matched yet.{" "}
-          <Text component={Link} href={`/session/${sessionId}/setup`} td="underline">
+          <Text
+            component={Link}
+            href={`/session/${sessionId}/setup`}
+            td="underline"
+          >
             Go to setup
           </Text>
         </Alert>
@@ -91,6 +108,21 @@ export default function ResultsPage() {
   }
 
   const { people, groups, result, name: sessionName } = session;
+  const fillUnmatched = session.fillUnmatched ?? false;
+  const mutualOnly = session.mutualOnly ?? false;
+  const fillGroups = session.fillGroups ?? false;
+
+  function isOptimalStepCached(step: number): boolean {
+    return (
+      matchCache.getCachedResult(sessionId, people, groups, {
+        matchingMethod: "optimal",
+        fillUnmatched,
+        optimalPriority: step,
+        mutualOnly,
+        fillGroups,
+      }) !== null
+    );
+  }
 
   function handleExport() {
     if (!result) return;
@@ -110,7 +142,13 @@ export default function ResultsPage() {
     <Container size="lg" py="xl">
       <Group justify="space-between" mb="md" wrap="wrap">
         <Group gap="xs">
-          <ActionIcon component={Link} href="/" variant="default" size="lg" aria-label="Home">
+          <ActionIcon
+            component={Link}
+            href="/"
+            variant="default"
+            size="lg"
+            aria-label="Home"
+          >
             <IconHome size={18} />
           </ActionIcon>
           <Title order={2}>{session.name}</Title>
@@ -124,9 +162,14 @@ export default function ResultsPage() {
           >
             Edit session
           </Button>
-          <Button leftSection={<IconArrowsShuffle size={16} />} onClick={() => runMatching(sessionId)}>
+          {/* Re-run button disabled: matching is deterministic and every option control
+              already triggers runMatching itself, so this had nothing to do. */}
+          {/* <Button
+            leftSection={<IconArrowsShuffle size={16} />}
+            onClick={() => runMatching(sessionId)}
+          >
             Re-run
-          </Button>
+          </Button> */}
           <NewSessionButton variant="default" />
         </Group>
       </Group>
@@ -146,11 +189,16 @@ export default function ResultsPage() {
             { label: "Optimal (lowest mean rank)", value: "optimal" },
           ]}
         />
+        <Text size="xs" c="dimmed" mt={4}>
+          {(session.matchingMethod ?? "stable") === "stable"
+            ? "Balances both sides' preferences into a matching neither a person nor a group could improve on by defecting together."
+            : "Matches as many people as possible, then minimizes a weighted average of both sides' achieved rank, weighted by the priority below — the result may not be stable."}
+        </Text>
         {(session.matchingMethod ?? "stable") === "stable" && (
           <Switch
             mt="sm"
             label="Avoid leaving anyone unmatched when capacity allows"
-            description="Shifts other people between groups they ranked to free up a seat — never into a group nobody ranked"
+            description="Shifts other people between groups they ranked to free up a seat — never into a group nobody ranked. With mutual-only on, this can't guarantee a seat if no mutually-ranked slot exists"
             checked={session.fillUnmatched ?? false}
             onChange={(e) => {
               setFillUnmatched(sessionId, e.currentTarget.checked);
@@ -163,20 +211,20 @@ export default function ResultsPage() {
             <Text size="sm" fw={500} mb={4}>
               Priority
             </Text>
-            <SegmentedControl
-              value={session.optimalPriority ?? "people"}
-              onChange={(v) => {
-                setOptimalPriority(sessionId, v as "people" | "balanced" | "groups");
+            <OptimalPrioritySlider
+              key={sessionId}
+              value={session.optimalPriority}
+              onDraftChange={() => setMatchingPending(true)}
+              onSettle={() => setMatchingPending(false)}
+              isStepCached={isOptimalStepCached}
+              onChange={(step) => {
+                setOptimalPriority(sessionId, step);
                 runMatching(sessionId);
               }}
-              data={[
-                { label: "People", value: "people" },
-                { label: "Balanced", value: "balanced" },
-                { label: "Groups", value: "groups" },
-              ]}
             />
           </Box>
         )}
+        <br/>
         <Switch
           mt="sm"
           label="Only pair if both sides ranked each other"
@@ -189,8 +237,8 @@ export default function ResultsPage() {
         />
         <Switch
           mt="sm"
-          label="Make sure every group fills its spots"
-          description="Force-fill any seats still open after matching with remaining unmatched people, even if neither side ranked the other"
+          label="Make sure every group gets at least one person"
+          description="Force one remaining unmatched person into any group left empty after matching, even if neither side ranked the other — unless mutual-only is on, which can leave a group empty rather than force a non-mutual pair"
           checked={session.fillGroups ?? false}
           onChange={(e) => {
             setFillGroups(sessionId, e.currentTarget.checked);
@@ -199,89 +247,112 @@ export default function ResultsPage() {
         />
       </Box>
 
-      <Tabs defaultValue="assignments">
-        <Tabs.List mb="md">
-          <Tabs.Tab value="assignments" leftSection={<IconListDetails size={16} />}>
-            Assignments
-          </Tabs.Tab>
-          <Tabs.Tab value="stats" leftSection={<IconChartBar size={16} />}>
-            Stats
-          </Tabs.Tab>
-          <Tabs.Tab value="stability" leftSection={<IconShieldCheck size={16} />}>
-            Stability
-          </Tabs.Tab>
-          <Tabs.Tab value="alternatives" leftSection={<IconGitCompare size={16} />}>
-            Alternatives
-          </Tabs.Tab>
-          <Tabs.Tab value="compare" leftSection={<IconArrowsDiff size={16} />}>
-            Compare methods
-          </Tabs.Tab>
-          <Tabs.Tab value="export" leftSection={<IconDownload size={16} />}>
-            Export
-          </Tabs.Tab>
-        </Tabs.List>
+      <Box pos="relative">
+        <LoadingOverlay
+          visible={isMatching}
+          zIndex={10}
+          overlayProps={{ radius: "sm", blur: 2 }}
+        />
+        <Tabs defaultValue="assignments">
+          <Tabs.List mb="md">
+            <Tabs.Tab
+              value="assignments"
+              leftSection={<IconListDetails size={16} />}
+            >
+              Assignments
+            </Tabs.Tab>
+            <Tabs.Tab value="stats" leftSection={<IconChartBar size={16} />}>
+              Stats
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="stability"
+              leftSection={<IconShieldCheck size={16} />}
+            >
+              Stability
+            </Tabs.Tab>
+            <Tabs.Tab
+              value="alternatives"
+              leftSection={<IconGitCompare size={16} />}
+            >
+              Alternatives
+            </Tabs.Tab>
+            <Tabs.Tab value="compare" leftSection={<IconArrowsDiff size={16} />}>
+              Compare methods
+            </Tabs.Tab>
+            <Tabs.Tab value="export" leftSection={<IconDownload size={16} />}>
+              Export
+            </Tabs.Tab>
+          </Tabs.List>
 
-        <Tabs.Panel value="assignments">
-          <AssignmentsTable
-            people={people}
-            groups={groups}
-            assignments={result.assignments}
-            bumpedPersonIds={result.bumpedPersonIds}
-            backfilledPersonIds={result.backfilledPersonIds}
-            forcedPersonIds={result.forcedPersonIds}
-          />
-        </Tabs.Panel>
+          <Tabs.Panel value="assignments">
+            <AssignmentsTable
+              people={people}
+              groups={groups}
+              assignments={result.assignments}
+              bumpedPersonIds={result.bumpedPersonIds}
+              backfilledPersonIds={result.backfilledPersonIds}
+              forcedPersonIds={result.forcedPersonIds}
+              bumpDetails={result.bumpDetails}
+            />
+          </Tabs.Panel>
 
-        <Tabs.Panel value="stats">
-          <StatsPanel
-            people={people}
-            groups={groups}
-            assignments={result.assignments}
-            bumpedPersonIds={result.bumpedPersonIds}
-            backfilledPersonIds={result.backfilledPersonIds}
-            forcedPersonIds={result.forcedPersonIds}
-          />
-        </Tabs.Panel>
+          <Tabs.Panel value="stats">
+            <StatsPanel
+              people={people}
+              groups={groups}
+              assignments={result.assignments}
+              bumpedPersonIds={result.bumpedPersonIds}
+              backfilledPersonIds={result.backfilledPersonIds}
+              forcedPersonIds={result.forcedPersonIds}
+              bumpDetails={result.bumpDetails}
+            />
+          </Tabs.Panel>
 
-        <Tabs.Panel value="stability">
-          <StabilityPanel people={people} groups={groups} assignments={result.assignments} />
-        </Tabs.Panel>
+          <Tabs.Panel value="stability">
+            <StabilityPanel
+              people={people}
+              groups={groups}
+              assignments={result.assignments}
+            />
+          </Tabs.Panel>
 
-        <Tabs.Panel value="alternatives">
-          <AlternativesPanel
-            people={people}
-            groups={groups}
-            assignments={result.assignments}
-            fillUnmatched={session.fillUnmatched}
-            matchingMethod={session.matchingMethod}
-            optimalPriority={session.optimalPriority}
-            mutualOnly={session.mutualOnly}
-            fillGroups={session.fillGroups}
-          />
-        </Tabs.Panel>
+          <Tabs.Panel value="alternatives">
+            <AlternativesPanel
+              people={people}
+              groups={groups}
+              assignments={result.assignments}
+              mutualOnly={session.mutualOnly}
+              bumpDetails={result.bumpDetails}
+            />
+          </Tabs.Panel>
 
-        <Tabs.Panel value="compare">
-          <CompareMethodsPanel
-            people={people}
-            groups={groups}
-            fillUnmatched={session.fillUnmatched}
-            optimalPriority={session.optimalPriority}
-            mutualOnly={session.mutualOnly}
-            fillGroups={session.fillGroups}
-          />
-        </Tabs.Panel>
+          <Tabs.Panel value="compare">
+            <CompareMethodsPanel
+              people={people}
+              groups={groups}
+              fillUnmatched={session.fillUnmatched}
+              optimalPriority={session.optimalPriority}
+              mutualOnly={session.mutualOnly}
+              fillGroups={session.fillGroups}
+            />
+          </Tabs.Panel>
 
-        <Tabs.Panel value="export">
-          <Stack align="flex-start">
-            <Text size="sm" c="dimmed">
-              Download the assignments as a CSV with each person&apos;s name, assigned group, and rank achieved.
-            </Text>
-            <Button leftSection={<IconDownload size={16} />} onClick={handleExport}>
-              Download CSV
-            </Button>
-          </Stack>
-        </Tabs.Panel>
-      </Tabs>
+          <Tabs.Panel value="export">
+            <Stack align="flex-start">
+              <Text size="sm" c="dimmed">
+                Download the assignments as a CSV with each person&apos;s
+                name, assigned group, and rank achieved.
+              </Text>
+              <Button
+                leftSection={<IconDownload size={16} />}
+                onClick={handleExport}
+              >
+                Download CSV
+              </Button>
+            </Stack>
+          </Tabs.Panel>
+        </Tabs>
+      </Box>
     </Container>
   );
 }

@@ -30,6 +30,7 @@ import {
 } from "@tabler/icons-react";
 import { CsvDropzone } from "@/components/CsvDropzone";
 import { NewSessionButton } from "@/components/NewSessionButton";
+import { OptimalPrioritySlider } from "@/components/OptimalPrioritySlider";
 import { PreviewTable } from "@/components/PreviewTable";
 import {
   buildSessionEntities,
@@ -132,11 +133,11 @@ export default function SetupPage() {
     setStep(1);
   }
 
-  function handleRunMatching() {
+  async function handleRunMatching() {
     if (imported) {
       setPeopleAndGroups(sessionId, imported.people, imported.groups);
     }
-    runMatching(sessionId);
+    await runMatching(sessionId);
     router.push(`/session/${sessionId}/results`);
   }
 
@@ -280,7 +281,7 @@ export default function SetupPage() {
               <Text size="xs" c="dimmed" mt={4}>
                 {(session.matchingMethod ?? "stable") === "stable"
                   ? "Balances both sides' preferences into a matching neither a person nor a group could improve on by defecting together."
-                  : "Ignores group preferences entirely and finds the assignment with the lowest possible average rank achieved, matching as many people as possible first."}
+                  : "Matches as many people as possible, then minimizes a weighted average of both sides' achieved rank, weighted by the priority below — the result may not be stable."}
               </Text>
             </Box>
             {(session.matchingMethod ?? "stable") === "optimal" && (
@@ -288,14 +289,10 @@ export default function SetupPage() {
                 <Text size="sm" fw={500} mb={4}>
                   Priority
                 </Text>
-                <SegmentedControl
-                  value={session.optimalPriority ?? "people"}
-                  onChange={(v) => setOptimalPriority(sessionId, v as "people" | "balanced" | "groups")}
-                  data={[
-                    { label: "People", value: "people" },
-                    { label: "Balanced", value: "balanced" },
-                    { label: "Groups", value: "groups" },
-                  ]}
+                <OptimalPrioritySlider
+                  key={sessionId}
+                  value={session.optimalPriority}
+                  onChange={(step) => setOptimalPriority(sessionId, step)}
                 />
                 <Text size="xs" c="dimmed" mt={4}>
                   Which side&apos;s stated preferences count more when picking among assignments that match the
@@ -303,10 +300,11 @@ export default function SetupPage() {
                 </Text>
               </Box>
             )}
+            <br/>
             {(session.matchingMethod ?? "stable") === "stable" && (
               <Switch
                 label="Avoid leaving anyone unmatched when capacity allows"
-                description="If someone's ranked groups are full, try shifting other people to a different group they also ranked to free up a seat — never into a group nobody ranked"
+                description="If someone's ranked groups are full, try shifting other people to a different group they also ranked to free up a seat — never into a group nobody ranked. With mutual-only on, this can't guarantee a seat if no mutually-ranked slot exists"
                 checked={session.fillUnmatched ?? false}
                 onChange={(e) => setFillUnmatched(sessionId, e.currentTarget.checked)}
               />
@@ -318,8 +316,8 @@ export default function SetupPage() {
               onChange={(e) => setMutualOnly(sessionId, e.currentTarget.checked)}
             />
             <Switch
-              label="Make sure every group fills its spots"
-              description="Force-fill any seats still open after matching with remaining unmatched people, even if neither side ranked the other"
+              label="Make sure every group gets at least one person"
+              description="Force one remaining unmatched person into any group left empty after matching, even if neither side ranked the other — unless mutual-only is on, which can leave a group empty rather than force a non-mutual pair"
               checked={session.fillGroups ?? false}
               onChange={(e) => setFillGroups(sessionId, e.currentTarget.checked)}
             />

@@ -1,22 +1,34 @@
 "use client";
 
+import { useState } from "react";
 import { BarChart } from "@mantine/charts";
 import {
   Alert,
   Card,
   Group,
   List,
-  Progress,
+  SegmentedControl,
   SimpleGrid,
   Stack,
   Table,
   Tabs,
   Text,
+  TextInput,
   Title,
 } from "@mantine/core";
-import { IconAlertTriangle } from "@tabler/icons-react";
-import { computeGroupFillRates, getAchievedRank, getGroupAchievedRank } from "@/lib/algorithm";
-import type { Assignment, Group as GroupEntity, Person } from "@/lib/types";
+import { IconAlertTriangle, IconSearch } from "@tabler/icons-react";
+import {
+  buildBumpEvictionIndex,
+  computeGroupFillRates,
+  getAchievedRank,
+  getAdjustedGroupHappiness,
+  getAdjustedPersonHappiness,
+  getGroupAchievedRank,
+} from "@/lib/algorithm";
+import { SortableHeader, useSearchSort } from "@/components/SortableTable";
+import type { Assignment, BumpDetail, Group as GroupEntity, Person } from "@/lib/types";
+
+type GroupStatsSortKey = "name" | "assigned" | "mean" | "unranked";
 
 interface StatsPanelProps {
   people: Person[];
@@ -26,6 +38,33 @@ interface StatsPanelProps {
   shiftedPersonIds?: string[];
   backfilledPersonIds?: string[];
   forcedPersonIds?: string[];
+  bumpDetails?: Record<string, BumpDetail>;
+}
+
+/** Builds a histogram over whatever integer range the values actually span (may include unranked-merged or bump-adjusted values below 1 or above the raw preference-list length). */
+function buildDistribution(
+  values: number[],
+  unrankedCount: number,
+  unmatchedCount: number,
+  showUnrankedSeparately: boolean,
+): { rank: string; count: number }[] {
+  const counts = new Map<number, number>();
+  for (const v of values) counts.set(v, (counts.get(v) ?? 0) + 1);
+  const data: { rank: string; count: number }[] = [];
+  if (counts.size > 0) {
+    const min = Math.min(...counts.keys());
+    const max = Math.max(...counts.keys());
+    for (let i = min; i <= max; i++) {
+      data.push({ rank: `#${i}`, count: counts.get(i) ?? 0 });
+    }
+  }
+  if (showUnrankedSeparately && unrankedCount > 0) {
+    data.push({ rank: "Unranked match", count: unrankedCount });
+  }
+  if (unmatchedCount > 0) {
+    data.push({ rank: "Unmatched", count: unmatchedCount });
+  }
+  return data;
 }
 
 export function StatsPanel({
@@ -36,9 +75,18 @@ export function StatsPanel({
   shiftedPersonIds = [],
   backfilledPersonIds = [],
   forcedPersonIds = [],
+  bumpDetails = {},
 }: StatsPanelProps) {
+  const [unrankedMode, setUnrankedMode] = useState<"separate" | "merged">("separate");
+  const merged = unrankedMode === "merged";
+
   const assignmentByPerson = new Map(assignments.map((a) => [a.personId, a]));
+
+  // Which people each (group, admitting person) pair evicted, for the group-side bump adjustment.
+  const evictionsByGroupAndBumper = buildBumpEvictionIndex(bumpDetails);
+
   const ranks: number[] = [];
+  const happinessScores: number[] = [];
   let unmatchedCount = 0;
   let unrankedMatchCount = 0;
 
@@ -49,14 +97,20 @@ export function StatsPanel({
       continue;
     }
     const rank = getAchievedRank(person, groupId);
-    if (rank === null) {
+    const isUnranked = rank === null;
+    if (isUnranked) {
       unrankedMatchCount++;
     } else {
       ranks.push(rank);
     }
+    if (!isUnranked || merged) {
+      const happiness = getAdjustedPersonHappiness(person, groupId, bumpDetails[person.id]);
+      if (happiness !== null) happinessScores.push(happiness);
+    }
   }
 
-  const mean = ranks.length > 0 ? ranks.reduce((a, b) => a + b, 0) / ranks.length : null;
+  const rankSum = ranks.reduce((a, b) => a + b, 0);
+  const mean = ranks.length > 0 ? rankSum / ranks.length : null;
   const sorted = [...ranks].sort((a, b) => a - b);
   const median =
     sorted.length === 0
@@ -65,25 +119,19 @@ export function StatsPanel({
         ? sorted[(sorted.length - 1) / 2]
         : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
 
-  const distributionMap = new Map<number, number>();
-  for (const r of ranks) distributionMap.set(r, (distributionMap.get(r) ?? 0) + 1);
-  const maxRank = ranks.length > 0 ? Math.max(...ranks) : 0;
-  const distributionData = Array.from({ length: maxRank }, (_, i) => ({
-    rank: `#${i + 1}`,
-    count: distributionMap.get(i + 1) ?? 0,
-  }));
-  if (unrankedMatchCount > 0) {
-    distributionData.push({ rank: "Unranked match", count: unrankedMatchCount });
-  }
-  if (unmatchedCount > 0) {
-    distributionData.push({ rank: "Unmatched", count: unmatchedCount });
-  }
+  const happinessSum = happinessScores.reduce((a, b) => a + b, 0);
+  const distributionData = buildDistribution(
+    happinessScores,
+    unrankedMatchCount,
+    unmatchedCount,
+    !merged,
+  );
 
   const fillRates = computeGroupFillRates(groups, assignments);
-  const groupNameById = new Map(groups.map((g) => [g.id, g.name]));
   const personNameById = new Map(people.map((p) => [p.id, p.name]));
 
   const groupRanks: number[] = [];
+  const groupHappinessScores: number[] = [];
   let groupUnrankedMatchCount = 0;
   const perGroupStats = groups.map((g) => {
     const memberIds = assignments.filter((a) => a.groupId === g.id).map((a) => a.personId);
@@ -91,12 +139,18 @@ export function StatsPanel({
     let unranked = 0;
     for (const personId of memberIds) {
       const rank = getGroupAchievedRank(g, personId);
-      if (rank === null) {
+      const isUnranked = rank === null;
+      if (isUnranked) {
         unranked++;
         groupUnrankedMatchCount++;
       } else {
         ranks.push(rank);
         groupRanks.push(rank);
+      }
+      if (!isUnranked || merged) {
+        const evicted = evictionsByGroupAndBumper.get(`${g.id}|${personId}`) ?? [];
+        const happiness = getAdjustedGroupHappiness(g, personId, evicted);
+        if (happiness !== null) groupHappinessScores.push(happiness);
       }
     }
     const groupMean = ranks.length > 0 ? ranks.reduce((a, b) => a + b, 0) / ranks.length : null;
@@ -110,8 +164,8 @@ export function StatsPanel({
     };
   });
 
-  const groupMean =
-    groupRanks.length > 0 ? groupRanks.reduce((a, b) => a + b, 0) / groupRanks.length : null;
+  const groupRankSum = groupRanks.reduce((a, b) => a + b, 0);
+  const groupMean = groupRanks.length > 0 ? groupRankSum / groupRanks.length : null;
   const sortedGroupRanks = [...groupRanks].sort((a, b) => a - b);
   const groupMedian =
     sortedGroupRanks.length === 0
@@ -122,16 +176,31 @@ export function StatsPanel({
             sortedGroupRanks[sortedGroupRanks.length / 2]) /
           2;
 
-  const groupDistributionMap = new Map<number, number>();
-  for (const r of groupRanks) groupDistributionMap.set(r, (groupDistributionMap.get(r) ?? 0) + 1);
-  const maxGroupRank = groupRanks.length > 0 ? Math.max(...groupRanks) : 0;
-  const groupDistributionData = Array.from({ length: maxGroupRank }, (_, i) => ({
-    rank: `#${i + 1}`,
-    count: groupDistributionMap.get(i + 1) ?? 0,
-  }));
-  if (groupUnrankedMatchCount > 0) {
-    groupDistributionData.push({ rank: "Unranked match", count: groupUnrankedMatchCount });
-  }
+  const groupHappinessSum = groupHappinessScores.reduce((a, b) => a + b, 0);
+  const groupDistributionData = buildDistribution(
+    groupHappinessScores,
+    groupUnrankedMatchCount,
+    0,
+    !merged,
+  );
+
+  const {
+    search: groupTableSearch,
+    setSearch: setGroupTableSearch,
+    sortKey: groupTableSortKey,
+    sortDirection: groupTableSortDirection,
+    handleSort: handleGroupTableSort,
+    rows: groupTableRows,
+  } = useSearchSort<(typeof perGroupStats)[number], GroupStatsSortKey>(
+    perGroupStats,
+    (row, query) => row.name.toLowerCase().includes(query),
+    {
+      name: (a, b) => a.name.localeCompare(b.name),
+      assigned: (a, b) => a.assigned - b.assigned,
+      mean: (a, b) => (a.mean ?? Infinity) - (b.mean ?? Infinity),
+      unranked: (a, b) => a.unranked - b.unranked,
+    },
+  );
 
   const emptySeats = fillRates.reduce((sum, f) => sum + Math.max(0, f.capacity - f.assigned), 0);
 
@@ -210,10 +279,31 @@ export function StatsPanel({
         </Alert>
       )}
 
+      <Group justify="space-between" wrap="wrap">
+        <Text size="sm" fw={500}>
+          Unranked matches
+        </Text>
+        <SegmentedControl
+          size="xs"
+          value={unrankedMode}
+          onChange={(v: string) => setUnrankedMode(v as "separate" | "merged")}
+          data={[
+            { label: "Show separately", value: "separate" },
+            { label: "Merge as rank N+1", value: "merged" },
+          ]}
+        />
+      </Group>
+      <Text size="xs" c="dimmed">
+        {merged
+          ? "A match to a group/person that wasn't ranked at all scores one worse than that side's least-preferred ranked option — e.g. ranking 5 people means anyone unranked scores as rank 6."
+          : "Matches to a group/person that wasn't ranked at all are broken out as their own bucket, separate from the numbered ranks."}
+      </Text>
+
       <Tabs defaultValue="person">
         <Tabs.List mb="md">
           <Tabs.Tab value="person">By person</Tabs.Tab>
           <Tabs.Tab value="group">By group</Tabs.Tab>
+          <Tabs.Tab value="sum">Sum score</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="person">
@@ -251,7 +341,9 @@ export function StatsPanel({
                   Happiness score distribution
                 </Title>
                 <Text size="xs" c="dimmed" mb="md">
-                  How well people did against their own preference lists.
+                  How well people did against their own preference lists. Anyone bumped from a
+                  tentative match has their score shifted by the gap between the group they lost
+                  and the one they landed in.
                 </Text>
                 <BarChart
                   h={260}
@@ -300,7 +392,8 @@ export function StatsPanel({
                 </Title>
                 <Text size="xs" c="dimmed" mb="md">
                   How well groups did against their own preference lists for the people they were
-                  assigned.
+                  assigned. Any eviction a group made to seat someone shifts its score by the gap
+                  between the person it let go and the one it kept.
                 </Text>
                 <BarChart
                   h={260}
@@ -313,39 +406,52 @@ export function StatsPanel({
 
             <Card withBorder padding="md">
               <Title order={4} mb="md">
-                Group fill rates
-              </Title>
-              <Stack gap="sm">
-                {fillRates.map((f) => (
-                  <Stack key={f.groupId} gap={4}>
-                    <Group justify="space-between">
-                      <Text size="sm">{groupNameById.get(f.groupId)}</Text>
-                      <Text size="sm" c="dimmed">
-                        {f.assigned} / {f.capacity}
-                      </Text>
-                    </Group>
-                    <Progress value={f.capacity > 0 ? (f.assigned / f.capacity) * 100 : 0} />
-                  </Stack>
-                ))}
-              </Stack>
-            </Card>
-
-            <Card withBorder padding="md">
-              <Title order={4} mb="md">
                 By group breakdown
               </Title>
+              <TextInput
+                placeholder="Search by group"
+                leftSection={<IconSearch size={16} />}
+                value={groupTableSearch}
+                onChange={(e) => setGroupTableSearch(e.currentTarget.value)}
+                mb="md"
+                maw={400}
+              />
               <Table.ScrollContainer minWidth={400}>
                 <Table striped highlightOnHover withTableBorder>
                   <Table.Thead>
                     <Table.Tr>
-                      <Table.Th>Group</Table.Th>
-                      <Table.Th>Assigned</Table.Th>
-                      <Table.Th>Mean rank achieved</Table.Th>
-                      <Table.Th>Unranked matches</Table.Th>
+                      <SortableHeader
+                        label="Group"
+                        sortKey="name"
+                        currentSort={groupTableSortKey}
+                        currentDirection={groupTableSortDirection}
+                        onSort={handleGroupTableSort}
+                      />
+                      <SortableHeader
+                        label="Assigned"
+                        sortKey="assigned"
+                        currentSort={groupTableSortKey}
+                        currentDirection={groupTableSortDirection}
+                        onSort={handleGroupTableSort}
+                      />
+                      <SortableHeader
+                        label="Mean rank achieved"
+                        sortKey="mean"
+                        currentSort={groupTableSortKey}
+                        currentDirection={groupTableSortDirection}
+                        onSort={handleGroupTableSort}
+                      />
+                      <SortableHeader
+                        label="Unranked matches"
+                        sortKey="unranked"
+                        currentSort={groupTableSortKey}
+                        currentDirection={groupTableSortDirection}
+                        onSort={handleGroupTableSort}
+                      />
                     </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
-                    {perGroupStats.map((g) => (
+                    {groupTableRows.map((g) => (
                       <Table.Tr key={g.groupId}>
                         <Table.Td>{g.name}</Table.Td>
                         <Table.Td>
@@ -359,6 +465,55 @@ export function StatsPanel({
                 </Table>
               </Table.ScrollContainer>
             </Card>
+          </Stack>
+        </Tabs.Panel>
+
+        <Tabs.Panel value="sum">
+          <Stack>
+            <Text size="sm" c="dimmed">
+              Happiness score, added up across everyone matched. <strong>Lower is happier</strong> — a low sum
+              means people and groups are, on average, landing near the top of their own lists.
+              Bumped people and the groups that bumped them have their score shifted by the rank
+              gap the eviction caused.
+            </Text>
+            <SimpleGrid cols={{ base: 1, sm: 2 }}>
+              <Card withBorder padding="md">
+                <Text size="sm" c="dimmed">
+                  Sum of happiness scores (people)
+                </Text>
+                <Text size="xl" fw={700}>
+                  {happinessScores.length > 0 ? happinessSum : "—"}
+                </Text>
+                <Text size="xs" c="dimmed" mt={4}>
+                  Across {happinessScores.length} scored{" "}
+                  {happinessScores.length === 1 ? "match" : "matches"}
+                  {!merged && (unrankedMatchCount > 0 || unmatchedCount > 0)
+                    ? ` (excludes ${unrankedMatchCount} unranked match${
+                        unrankedMatchCount === 1 ? "" : "es"
+                      } and ${unmatchedCount} unmatched)`
+                    : merged && unmatchedCount > 0
+                      ? ` (excludes ${unmatchedCount} unmatched)`
+                      : ""}
+                </Text>
+              </Card>
+              <Card withBorder padding="md">
+                <Text size="sm" c="dimmed">
+                  Sum of happiness scores (groups)
+                </Text>
+                <Text size="xl" fw={700}>
+                  {groupHappinessScores.length > 0 ? groupHappinessSum : "—"}
+                </Text>
+                <Text size="xs" c="dimmed" mt={4}>
+                  Across {groupHappinessScores.length} scored{" "}
+                  {groupHappinessScores.length === 1 ? "match" : "matches"}
+                  {!merged && groupUnrankedMatchCount > 0
+                    ? ` (excludes ${groupUnrankedMatchCount} unranked match${
+                        groupUnrankedMatchCount === 1 ? "" : "es"
+                      })`
+                    : ""}
+                </Text>
+              </Card>
+            </SimpleGrid>
           </Stack>
         </Tabs.Panel>
       </Tabs>

@@ -5,7 +5,7 @@ import "@mantine/charts/styles.css";
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { ColorSchemeScript, mantineHtmlProps, MantineProvider } from "@mantine/core";
+import { ColorSchemeScript, mantineHtmlProps, MantineProvider, Text } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { theme } from "./theme";
 
@@ -24,6 +24,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <MantineProvider theme={theme} defaultColorScheme="auto">
           <Notifications />
           {children}
+          <Text component="footer" size="xs" c="dimmed" ta="center" py="md">
+            No data is stored on a server — everything stays in your browser.
+          </Text>
         </MantineProvider>
       </body>
     </html>
